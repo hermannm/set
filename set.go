@@ -1,6 +1,8 @@
 // Package set provides a generic Set data structure, an unordered collection of unique elements.
 package set
 
+import "fmt"
+
 // A Set is an unordered collection of unique elements, whose type is given by the Element type
 // parameter.
 //
@@ -134,6 +136,24 @@ func (set Set[Element]) Copy() Set[Element] {
 	}
 
 	return copy
+}
+
+// String implements fmt.Stringer to customize the print format of Set.
+//
+// Since sets are unordered, the order of elements in the string may differ each time it is called.
+func (set Set[Element]) String() string {
+	if set.Size() == 0 {
+		return "Set{}"
+	}
+
+	setString := "Set{"
+	for element := range set {
+		setString += fmt.Sprintf("%v, ", element)
+	}
+	setString = setString[:len(setString)-2] // Removes ", " after the last element.
+	setString += "}"
+
+	return setString
 }
 
 // Union creates a new set that contains all the elements of both of the given sets.
