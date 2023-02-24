@@ -1,6 +1,7 @@
 # set
 
-A small Go package that provides a generic Set data structure.
+A small Go package that provides a generic Set data structure, an unordered collection of unique
+elements.
 
 Run `go get hermannm.dev/set` to add it to your project!
 
