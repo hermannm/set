@@ -3,6 +3,7 @@ package set
 
 import (
 	"fmt"
+	"strings"
 )
 
 // A Set is an unordered collection of unique elements, whose type is given by the Element type
@@ -144,18 +145,29 @@ func (set Set[Element]) Copy() Set[Element] {
 //
 // Since sets are unordered, the order of elements in the string may differ each time it is called.
 func (set Set[Element]) String() string {
-	if set.Size() == 0 {
-		return "Set{}"
-	}
+	size := set.Size()
 
-	setString := "Set{"
+	var stringBuilder strings.Builder
+
+	stringBuilder.WriteString("Set{")
+
+	index := 0
 	for element := range set {
-		setString += fmt.Sprintf("%v, ", element)
-	}
-	setString = setString[:len(setString)-2] // Removes ", " after the last element.
-	setString += "}"
+		var format string
+		if index < size-1 {
+			format = "%v, "
+		} else {
+			format = "%v"
+		}
 
-	return setString
+		fmt.Fprintf(&stringBuilder, format, element)
+
+		index++
+	}
+
+	stringBuilder.WriteString("}")
+
+	return stringBuilder.String()
 }
 
 // Union creates a new set that contains all the elements of both of the given sets.
