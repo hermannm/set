@@ -115,7 +115,9 @@ func TestAddToNil(t *testing.T) {
 
 		if expectedMessage := "called Add on nil Set"; errMessage != expectedMessage {
 			t.Errorf(
-				`expected Add to panic with message "%s", got "%s"`, expectedMessage, errMessage,
+				"expected Add to panic with message '%s', got '%s'",
+				expectedMessage,
+				errMessage,
 			)
 		}
 	}()
