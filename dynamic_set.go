@@ -58,7 +58,7 @@ func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
 func (set *DynamicSet[E]) SetSizeThreshold(sizeThreshold int) {
 	set.sizeThreshold = sizeThreshold
 
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		if len(set.array.elements) >= sizeThreshold {
 			set.transformToHashSet()
 		}
@@ -70,7 +70,7 @@ func (set *DynamicSet[E]) SetSizeThreshold(sizeThreshold int) {
 }
 
 func (set *DynamicSet[E]) Add(element E) {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		set.array.Add(element)
 
 		if set.arraySetReachedThreshold() {
@@ -86,7 +86,7 @@ func (set *DynamicSet[E]) AddMultiple(elements ...E) {
 }
 
 func (set *DynamicSet[E]) AddFromSlice(elements []E) {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		set.array.AddFromSlice(elements)
 
 		if set.arraySetReachedThreshold() {
@@ -98,7 +98,7 @@ func (set *DynamicSet[E]) AddFromSlice(elements []E) {
 }
 
 func (set *DynamicSet[E]) MergeWith(otherSet ComparableSet[E]) {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		set.array.MergeWith(otherSet)
 
 		if set.arraySetReachedThreshold() {
@@ -110,7 +110,7 @@ func (set *DynamicSet[E]) MergeWith(otherSet ComparableSet[E]) {
 }
 
 func (set *DynamicSet[E]) Remove(element E) {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		set.array.Remove(element)
 	} else {
 		set.hash.Remove(element)
@@ -126,7 +126,7 @@ func (set *DynamicSet[E]) Clear() {
 }
 
 func (set DynamicSet[E]) Contains(element E) bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.Contains(element)
 	} else {
 		return set.hash.Contains(element)
@@ -134,7 +134,7 @@ func (set DynamicSet[E]) Contains(element E) bool {
 }
 
 func (set DynamicSet[E]) Size() int {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.Size()
 	} else {
 		return set.hash.Size()
@@ -142,7 +142,7 @@ func (set DynamicSet[E]) Size() int {
 }
 
 func (set DynamicSet[E]) IsEmpty() bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.IsEmpty()
 	} else {
 		return set.hash.IsEmpty()
@@ -150,7 +150,7 @@ func (set DynamicSet[E]) IsEmpty() bool {
 }
 
 func (set DynamicSet[E]) Equals(otherSet ComparableSet[E]) bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.Equals(otherSet)
 	} else {
 		return set.hash.Equals(otherSet)
@@ -158,7 +158,7 @@ func (set DynamicSet[E]) Equals(otherSet ComparableSet[E]) bool {
 }
 
 func (set DynamicSet[E]) IsSubsetOf(otherSet ComparableSet[E]) bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.IsSubsetOf(otherSet)
 	} else {
 		return set.hash.IsSubsetOf(otherSet)
@@ -166,7 +166,7 @@ func (set DynamicSet[E]) IsSubsetOf(otherSet ComparableSet[E]) bool {
 }
 
 func (set DynamicSet[E]) IsSupersetOf(otherSet ComparableSet[E]) bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.IsSupersetOf(otherSet)
 	} else {
 		return set.hash.IsSupersetOf(otherSet)
@@ -181,7 +181,7 @@ func (set DynamicSet[E]) Union(otherSet ComparableSet[E]) Set[E] {
 func (set DynamicSet[E]) UnionDynamicSet(otherSet ComparableSet[E]) DynamicSet[E] {
 	union := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
 
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		union.array = set.array.UnionArraySet(otherSet)
 
 		if union.arraySetReachedThreshold() {
@@ -202,7 +202,7 @@ func (set DynamicSet[E]) Intersection(otherSet ComparableSet[E]) Set[E] {
 func (set DynamicSet[E]) IntersectionDynamicSet(otherSet ComparableSet[E]) DynamicSet[E] {
 	intersection := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
 
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		intersection.array = set.array.IntersectionArraySet(otherSet)
 	} else {
 		intersection.hash = set.hash.IntersectionHashSet(otherSet)
@@ -216,7 +216,7 @@ func (set DynamicSet[E]) IntersectionDynamicSet(otherSet ComparableSet[E]) Dynam
 }
 
 func (set DynamicSet[E]) ToSlice() []E {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.ToSlice()
 	} else {
 		return set.hash.ToSlice()
@@ -224,7 +224,7 @@ func (set DynamicSet[E]) ToSlice() []E {
 }
 
 func (set DynamicSet[E]) ToMap() map[E]struct{} {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.ToMap()
 	} else {
 		return set.hash.ToMap()
@@ -232,7 +232,7 @@ func (set DynamicSet[E]) ToMap() map[E]struct{} {
 }
 
 func (set DynamicSet[E]) ToArraySet() ArraySet[E] {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.CopyArraySet()
 	} else {
 		return set.hash.ToArraySet()
@@ -240,7 +240,7 @@ func (set DynamicSet[E]) ToArraySet() ArraySet[E] {
 }
 
 func (set DynamicSet[E]) ToHashSet() HashSet[E] {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.ToHashSet()
 	} else {
 		return set.hash.CopyHashSet()
@@ -259,7 +259,7 @@ func (set DynamicSet[E]) Copy() Set[E] {
 func (set DynamicSet[E]) CopyDynamicSet() DynamicSet[E] {
 	newSet := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
 
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		newSet.array = set.array.CopyArraySet()
 	} else {
 		newSet.hash = set.hash.CopyHashSet()
@@ -272,7 +272,7 @@ func (set DynamicSet[E]) String() string {
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("DynamicSet{")
 
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		for i, element := range set.array.elements {
 			fmt.Fprint(&stringBuilder, element)
 
@@ -298,14 +298,14 @@ func (set DynamicSet[E]) String() string {
 }
 
 func (set DynamicSet[E]) Iterate(yield func(element E) bool) bool {
-	if set.isArraySet() {
+	if set.IsArraySet() {
 		return set.array.Iterate(yield)
 	} else {
 		return set.hash.Iterate(yield)
 	}
 }
 
-func (set DynamicSet[E]) isArraySet() bool {
+func (set DynamicSet[E]) IsArraySet() bool {
 	return set.hash.elements == nil
 }
 
