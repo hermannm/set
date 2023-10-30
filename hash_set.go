@@ -56,12 +56,12 @@ func (set *HashSet[T]) AddFromSlice(items []T) {
 	}
 }
 
-func (set *HashSet[T]) MergeWith(other ComparableSet[T]) {
+func (set *HashSet[T]) MergeWith(otherSet ComparableSet[T]) {
 	if set.items == nil {
-		set.items = make(map[T]struct{}, other.Size())
+		set.items = make(map[T]struct{}, otherSet.Size())
 	}
 
-	other.Iterate(func(item T) bool {
+	otherSet.Iterate(func(item T) bool {
 		set.Add(item)
 		return true
 	})
@@ -94,13 +94,13 @@ func (set HashSet[T]) IsEmpty() bool {
 	return len(set.items) == 0
 }
 
-func (set HashSet[T]) Equals(other ComparableSet[T]) bool {
-	return set.Size() == other.Size() && set.IsSubsetOf(other)
+func (set HashSet[T]) Equals(otherSet ComparableSet[T]) bool {
+	return set.Size() == otherSet.Size() && set.IsSubsetOf(otherSet)
 }
 
-func (set HashSet[T]) IsSubsetOf(other ComparableSet[T]) bool {
+func (set HashSet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
 	for item := range set.items {
-		if !other.Contains(item) {
+		if !otherSet.Contains(item) {
 			return false
 		}
 	}
@@ -108,23 +108,23 @@ func (set HashSet[T]) IsSubsetOf(other ComparableSet[T]) bool {
 	return true
 }
 
-func (set HashSet[T]) IsSupersetOf(other ComparableSet[T]) bool {
-	return other.IsSubsetOf(set)
+func (set HashSet[T]) IsSupersetOf(otherSet ComparableSet[T]) bool {
+	return otherSet.IsSubsetOf(set)
 }
 
-func (set HashSet[T]) Union(other ComparableSet[T]) Set[T] {
-	union := set.UnionHashSet(other)
+func (set HashSet[T]) Union(otherSet ComparableSet[T]) Set[T] {
+	union := set.UnionHashSet(otherSet)
 	return &union
 }
 
-func (set HashSet[T]) UnionHashSet(other ComparableSet[T]) HashSet[T] {
-	union := HashSetWithCapacity[T](set.Size() + other.Size())
+func (set HashSet[T]) UnionHashSet(otherSet ComparableSet[T]) HashSet[T] {
+	union := HashSetWithCapacity[T](set.Size() + otherSet.Size())
 
 	for item := range set.items {
 		union.Add(item)
 	}
 
-	other.Iterate(func(item T) bool {
+	otherSet.Iterate(func(item T) bool {
 		union.Add(item)
 		return true
 	})
@@ -132,22 +132,22 @@ func (set HashSet[T]) UnionHashSet(other ComparableSet[T]) HashSet[T] {
 	return union
 }
 
-func (set HashSet[T]) Intersection(other ComparableSet[T]) Set[T] {
-	intersection := set.IntersectionHashSet(other)
+func (set HashSet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
+	intersection := set.IntersectionHashSet(otherSet)
 	return &intersection
 }
 
-func (set HashSet[T]) IntersectionHashSet(other ComparableSet[T]) HashSet[T] {
+func (set HashSet[T]) IntersectionHashSet(otherSet ComparableSet[T]) HashSet[T] {
 	var capacity int
-	if set.Size() < other.Size() {
+	if set.Size() < otherSet.Size() {
 		capacity = set.Size()
 	} else {
-		capacity = other.Size()
+		capacity = otherSet.Size()
 	}
 
 	intersection := HashSetWithCapacity[T](capacity)
 	for item := range set.items {
-		if other.Contains(item) {
+		if otherSet.Contains(item) {
 			intersection.Add(item)
 		}
 	}

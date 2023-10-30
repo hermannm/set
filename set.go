@@ -2,23 +2,23 @@ package set
 
 type Set[T comparable] interface {
 	ComparableSet[T]
-	Add(T)
-	AddMultiple(...T)
-	AddFromSlice([]T)
-	MergeWith(ComparableSet[T])
-	Remove(T)
+	Add(item T)
+	AddMultiple(items ...T)
+	AddFromSlice(items []T)
+	MergeWith(otherSet ComparableSet[T])
+	Remove(item T)
 	Clear()
 }
 
 type ComparableSet[T comparable] interface {
-	Contains(T) bool
+	Contains(item T) bool
 	Size() int
 	IsEmpty() bool
-	Equals(ComparableSet[T]) bool
-	IsSubsetOf(ComparableSet[T]) bool
-	IsSupersetOf(ComparableSet[T]) bool
-	Union(ComparableSet[T]) Set[T]
-	Intersection(ComparableSet[T]) Set[T]
+	Equals(otherSet ComparableSet[T]) bool
+	IsSubsetOf(otherSet ComparableSet[T]) bool
+	IsSupersetOf(otherSet ComparableSet[T]) bool
+	Union(otherSet ComparableSet[T]) Set[T]
+	Intersection(otherSet ComparableSet[T]) Set[T]
 	ToSlice() []T
 	ToMap() map[T]struct{}
 	ToArraySet() ArraySet[T]

@@ -62,12 +62,12 @@ func (set *ArraySet[T]) AddFromSlice(items []T) {
 	}
 }
 
-func (set *ArraySet[T]) MergeWith(other ComparableSet[T]) {
+func (set *ArraySet[T]) MergeWith(otherSet ComparableSet[T]) {
 	if set.items == nil {
-		set.items = make([]T, 0, other.Size())
+		set.items = make([]T, 0, otherSet.Size())
 	}
 
-	other.Iterate(func(item T) bool {
+	otherSet.Iterate(func(item T) bool {
 		set.Add(item)
 		return true
 	})
@@ -104,13 +104,13 @@ func (set ArraySet[T]) IsEmpty() bool {
 	return len(set.items) == 0
 }
 
-func (set ArraySet[T]) Equals(other ComparableSet[T]) bool {
-	return set.Size() == other.Size() && set.IsSubsetOf(other)
+func (set ArraySet[T]) Equals(otherSet ComparableSet[T]) bool {
+	return set.Size() == otherSet.Size() && set.IsSubsetOf(otherSet)
 }
 
-func (set ArraySet[T]) IsSubsetOf(other ComparableSet[T]) bool {
+func (set ArraySet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
 	for _, item := range set.items {
-		if !other.Contains(item) {
+		if !otherSet.Contains(item) {
 			return false
 		}
 	}
@@ -118,23 +118,23 @@ func (set ArraySet[T]) IsSubsetOf(other ComparableSet[T]) bool {
 	return true
 }
 
-func (set ArraySet[T]) IsSupersetOf(other ComparableSet[T]) bool {
-	return other.IsSubsetOf(set)
+func (set ArraySet[T]) IsSupersetOf(otherSet ComparableSet[T]) bool {
+	return otherSet.IsSubsetOf(set)
 }
 
-func (set ArraySet[T]) Union(other ComparableSet[T]) Set[T] {
-	union := set.UnionArraySet(other)
+func (set ArraySet[T]) Union(otherSet ComparableSet[T]) Set[T] {
+	union := set.UnionArraySet(otherSet)
 	return &union
 }
 
-func (set ArraySet[T]) UnionArraySet(other ComparableSet[T]) ArraySet[T] {
-	union := ArraySetWithCapacity[T](set.Size() + other.Size())
+func (set ArraySet[T]) UnionArraySet(otherSet ComparableSet[T]) ArraySet[T] {
+	union := ArraySetWithCapacity[T](set.Size() + otherSet.Size())
 
 	for _, item := range set.items {
 		union.Add(item)
 	}
 
-	other.Iterate(func(item T) bool {
+	otherSet.Iterate(func(item T) bool {
 		union.Add(item)
 		return true
 	})
@@ -142,22 +142,22 @@ func (set ArraySet[T]) UnionArraySet(other ComparableSet[T]) ArraySet[T] {
 	return union
 }
 
-func (set ArraySet[T]) Intersection(other ComparableSet[T]) Set[T] {
-	intersection := set.IntersectionArraySet(other)
+func (set ArraySet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
+	intersection := set.IntersectionArraySet(otherSet)
 	return &intersection
 }
 
-func (set ArraySet[T]) IntersectionArraySet(other ComparableSet[T]) ArraySet[T] {
+func (set ArraySet[T]) IntersectionArraySet(otherSet ComparableSet[T]) ArraySet[T] {
 	var capacity int
-	if set.Size() < other.Size() {
+	if set.Size() < otherSet.Size() {
 		capacity = set.Size()
 	} else {
-		capacity = other.Size()
+		capacity = otherSet.Size()
 	}
 
 	intersection := ArraySetWithCapacity[T](capacity)
 	for _, item := range set.items {
-		if other.Contains(item) {
+		if otherSet.Contains(item) {
 			intersection.Add(item)
 		}
 	}

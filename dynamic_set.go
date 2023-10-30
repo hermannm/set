@@ -92,15 +92,15 @@ func (set *DynamicSet[T]) AddFromSlice(items []T) {
 	}
 }
 
-func (set *DynamicSet[T]) MergeWith(other ComparableSet[T]) {
+func (set *DynamicSet[T]) MergeWith(otherSet ComparableSet[T]) {
 	if set.isArraySet() {
-		set.array.MergeWith(other)
+		set.array.MergeWith(otherSet)
 
 		if set.arraySetReachedCutoff() {
 			set.transformToHashSet()
 		}
 	} else {
-		set.hash.MergeWith(other)
+		set.hash.MergeWith(otherSet)
 	}
 }
 
@@ -144,63 +144,63 @@ func (set DynamicSet[T]) IsEmpty() bool {
 	}
 }
 
-func (set DynamicSet[T]) Equals(other ComparableSet[T]) bool {
+func (set DynamicSet[T]) Equals(otherSet ComparableSet[T]) bool {
 	if set.isArraySet() {
-		return set.array.Equals(other)
+		return set.array.Equals(otherSet)
 	} else {
-		return set.hash.Equals(other)
+		return set.hash.Equals(otherSet)
 	}
 }
 
-func (set DynamicSet[T]) IsSubsetOf(other ComparableSet[T]) bool {
+func (set DynamicSet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
 	if set.isArraySet() {
-		return set.array.IsSubsetOf(other)
+		return set.array.IsSubsetOf(otherSet)
 	} else {
-		return set.hash.IsSubsetOf(other)
+		return set.hash.IsSubsetOf(otherSet)
 	}
 }
 
-func (set DynamicSet[T]) IsSupersetOf(other ComparableSet[T]) bool {
+func (set DynamicSet[T]) IsSupersetOf(otherSet ComparableSet[T]) bool {
 	if set.isArraySet() {
-		return set.array.IsSupersetOf(other)
+		return set.array.IsSupersetOf(otherSet)
 	} else {
-		return set.hash.IsSupersetOf(other)
+		return set.hash.IsSupersetOf(otherSet)
 	}
 }
 
-func (set DynamicSet[T]) Union(other ComparableSet[T]) Set[T] {
-	union := set.UnionDynamicSet(other)
+func (set DynamicSet[T]) Union(otherSet ComparableSet[T]) Set[T] {
+	union := set.UnionDynamicSet(otherSet)
 	return &union
 }
 
-func (set DynamicSet[T]) UnionDynamicSet(other ComparableSet[T]) DynamicSet[T] {
+func (set DynamicSet[T]) UnionDynamicSet(otherSet ComparableSet[T]) DynamicSet[T] {
 	union := DynamicSet[T]{resizeCutoff: set.resizeCutoff}
 
 	if set.isArraySet() {
-		union.array = set.array.UnionArraySet(other)
+		union.array = set.array.UnionArraySet(otherSet)
 
 		if union.arraySetReachedCutoff() {
 			union.transformToHashSet()
 		}
 	} else {
-		union.hash = set.hash.UnionHashSet(other)
+		union.hash = set.hash.UnionHashSet(otherSet)
 	}
 
 	return union
 }
 
-func (set DynamicSet[T]) Intersection(other ComparableSet[T]) Set[T] {
-	intersection := set.IntersectionDynamicSet(other)
+func (set DynamicSet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
+	intersection := set.IntersectionDynamicSet(otherSet)
 	return &intersection
 }
 
-func (set DynamicSet[T]) IntersectionDynamicSet(other ComparableSet[T]) DynamicSet[T] {
+func (set DynamicSet[T]) IntersectionDynamicSet(otherSet ComparableSet[T]) DynamicSet[T] {
 	intersection := DynamicSet[T]{resizeCutoff: set.resizeCutoff}
 
 	if set.isArraySet() {
-		intersection.array = set.array.IntersectionArraySet(other)
+		intersection.array = set.array.IntersectionArraySet(otherSet)
 	} else {
-		intersection.hash = set.hash.IntersectionHashSet(other)
+		intersection.hash = set.hash.IntersectionHashSet(otherSet)
 
 		if intersection.hashSetReachedCutoff() {
 			intersection.transformToArraySet()
