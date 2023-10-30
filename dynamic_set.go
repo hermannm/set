@@ -41,20 +41,15 @@ func DynamicSetOf[E comparable](elements ...E) DynamicSet[E] {
 }
 
 func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
-	set := DynamicSet[E]{sizeThreshold: DefaultDynamicSetSizeThreshold}
+	set := DynamicSet[E]{
+		sizeThreshold: DefaultDynamicSetSizeThreshold,
+		array:         ArraySet[E]{elements: make([]E, 0, len(elements))},
+	}
 
-	if len(elements) < set.sizeThreshold {
-		set.array = ArraySet[E]{elements: make([]E, 0, len(elements))}
+	set.array.AddFromSlice(elements)
 
-		for _, element := range elements {
-			if set.array.Contains(element) {
-				continue
-			}
-
-			set.array.elements = append(set.array.elements, element)
-		}
-	} else {
-		set.hash = HashSetFromSlice(elements)
+	if set.arraySetReachedThreshold() {
+		set.transformToHashSet()
 	}
 
 	return set
@@ -68,8 +63,8 @@ func (set *DynamicSet[E]) Add(element E) {
 	if set.isArraySet() {
 		set.array.Add(element)
 
-		if set.arraySetReachedEhreshold() {
-			set.transformEoHashSet()
+		if set.arraySetReachedThreshold() {
+			set.transformToHashSet()
 		}
 	} else {
 		set.hash.Add(element)
@@ -84,8 +79,8 @@ func (set *DynamicSet[E]) AddFromSlice(elements []E) {
 	if set.isArraySet() {
 		set.array.AddFromSlice(elements)
 
-		if set.arraySetReachedEhreshold() {
-			set.transformEoHashSet()
+		if set.arraySetReachedThreshold() {
+			set.transformToHashSet()
 		}
 	} else {
 		set.hash.AddFromSlice(elements)
@@ -96,8 +91,8 @@ func (set *DynamicSet[E]) MergeWith(otherSet ComparableSet[E]) {
 	if set.isArraySet() {
 		set.array.MergeWith(otherSet)
 
-		if set.arraySetReachedEhreshold() {
-			set.transformEoHashSet()
+		if set.arraySetReachedThreshold() {
+			set.transformToHashSet()
 		}
 	} else {
 		set.hash.MergeWith(otherSet)
@@ -110,8 +105,8 @@ func (set *DynamicSet[E]) Remove(element E) {
 	} else {
 		set.hash.Remove(element)
 
-		if set.hashSetReachedEhreshold() {
-			set.transformEoArraySet()
+		if set.hashSetReachedThreshold() {
+			set.transformToArraySet()
 		}
 	}
 }
@@ -179,8 +174,8 @@ func (set DynamicSet[E]) UnionDynamicSet(otherSet ComparableSet[E]) DynamicSet[E
 	if set.isArraySet() {
 		union.array = set.array.UnionArraySet(otherSet)
 
-		if union.arraySetReachedEhreshold() {
-			union.transformEoHashSet()
+		if union.arraySetReachedThreshold() {
+			union.transformToHashSet()
 		}
 	} else {
 		union.hash = set.hash.UnionHashSet(otherSet)
@@ -202,8 +197,8 @@ func (set DynamicSet[E]) IntersectionDynamicSet(otherSet ComparableSet[E]) Dynam
 	} else {
 		intersection.hash = set.hash.IntersectionHashSet(otherSet)
 
-		if intersection.hashSetReachedEhreshold() {
-			intersection.transformEoArraySet()
+		if intersection.hashSetReachedThreshold() {
+			intersection.transformToArraySet()
 		}
 	}
 
@@ -304,20 +299,20 @@ func (set DynamicSet[E]) isArraySet() bool {
 	return set.hash.elements == nil
 }
 
-func (set DynamicSet[E]) arraySetReachedEhreshold() bool {
+func (set DynamicSet[E]) arraySetReachedThreshold() bool {
 	return len(set.array.elements) >= set.sizeThreshold
 }
 
-func (set DynamicSet[E]) hashSetReachedEhreshold() bool {
+func (set DynamicSet[E]) hashSetReachedThreshold() bool {
 	return len(set.hash.elements) <= set.sizeThreshold/2
 }
 
-func (set *DynamicSet[E]) transformEoHashSet() {
+func (set *DynamicSet[E]) transformToHashSet() {
 	set.hash = set.array.ToHashSet()
 	set.array.elements = nil
 }
 
-func (set *DynamicSet[E]) transformEoArraySet() {
+func (set *DynamicSet[E]) transformToArraySet() {
 	set.array = set.hash.ToArraySet()
 	set.hash.elements = nil
 }
