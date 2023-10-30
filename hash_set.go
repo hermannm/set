@@ -5,102 +5,102 @@ import (
 	"strings"
 )
 
-type HashSet[T comparable] struct {
-	items map[T]struct{}
+type HashSet[E comparable] struct {
+	elements map[E]struct{}
 }
 
 var _ Set[int] = (*HashSet[int])(nil)
 var _ ComparableSet[int] = HashSet[int]{}
 
-func NewHashSet[T comparable]() HashSet[T] {
-	return HashSet[T]{items: make(map[T]struct{})}
+func NewHashSet[E comparable]() HashSet[E] {
+	return HashSet[E]{elements: make(map[E]struct{})}
 }
 
-func HashSetWithCapacity[T comparable](initialCapacity int) HashSet[T] {
-	return HashSet[T]{items: make(map[T]struct{}, initialCapacity)}
+func HashSetWithCapacity[E comparable](initialCapacity int) HashSet[E] {
+	return HashSet[E]{elements: make(map[E]struct{}, initialCapacity)}
 }
 
-func HashSetOf[T comparable](items ...T) HashSet[T] {
-	return HashSetFromSlice(items)
+func HashSetOf[E comparable](elements ...E) HashSet[E] {
+	return HashSetFromSlice(elements)
 }
 
-func HashSetFromSlice[T comparable](items []T) HashSet[T] {
-	set := HashSet[T]{items: make(map[T]struct{}, len(items))}
+func HashSetFromSlice[E comparable](elements []E) HashSet[E] {
+	set := HashSet[E]{elements: make(map[E]struct{}, len(elements))}
 
-	for _, item := range items {
-		set.items[item] = struct{}{}
+	for _, element := range elements {
+		set.elements[element] = struct{}{}
 	}
 
 	return set
 }
 
-func (set *HashSet[T]) Add(item T) {
-	if set.items == nil {
-		set.items = make(map[T]struct{})
+func (set *HashSet[E]) Add(element E) {
+	if set.elements == nil {
+		set.elements = make(map[E]struct{})
 	}
 
-	set.items[item] = struct{}{}
+	set.elements[element] = struct{}{}
 }
 
-func (set *HashSet[T]) AddMultiple(items ...T) {
-	set.AddFromSlice(items)
+func (set *HashSet[E]) AddMultiple(elements ...E) {
+	set.AddFromSlice(elements)
 }
 
-func (set *HashSet[T]) AddFromSlice(items []T) {
-	if set.items == nil {
-		set.items = make(map[T]struct{}, len(items))
+func (set *HashSet[E]) AddFromSlice(elements []E) {
+	if set.elements == nil {
+		set.elements = make(map[E]struct{}, len(elements))
 	}
 
-	for _, item := range items {
-		set.items[item] = struct{}{}
+	for _, element := range elements {
+		set.elements[element] = struct{}{}
 	}
 }
 
-func (set *HashSet[T]) MergeWith(otherSet ComparableSet[T]) {
-	if set.items == nil {
-		set.items = make(map[T]struct{}, otherSet.Size())
+func (set *HashSet[E]) MergeWith(otherSet ComparableSet[E]) {
+	if set.elements == nil {
+		set.elements = make(map[E]struct{}, otherSet.Size())
 	}
 
-	otherSet.Iterate(func(item T) bool {
-		set.Add(item)
+	otherSet.Iterate(func(element E) bool {
+		set.Add(element)
 		return true
 	})
 }
 
-func (set HashSet[T]) Remove(item T) {
-	delete(set.items, item)
+func (set HashSet[E]) Remove(element E) {
+	delete(set.elements, element)
 }
 
-func (set HashSet[T]) Clear() {
-	for item := range set.items {
-		delete(set.items, item)
+func (set HashSet[E]) Clear() {
+	for element := range set.elements {
+		delete(set.elements, element)
 	}
 }
 
-func (set HashSet[T]) Contains(item T) bool {
-	if set.items == nil {
+func (set HashSet[E]) Contains(element E) bool {
+	if set.elements == nil {
 		return false
 	}
 
-	_, contains := set.items[item]
+	_, contains := set.elements[element]
 	return contains
 }
 
-func (set HashSet[T]) Size() int {
-	return len(set.items)
+func (set HashSet[E]) Size() int {
+	return len(set.elements)
 }
 
-func (set HashSet[T]) IsEmpty() bool {
-	return len(set.items) == 0
+func (set HashSet[E]) IsEmpty() bool {
+	return len(set.elements) == 0
 }
 
-func (set HashSet[T]) Equals(otherSet ComparableSet[T]) bool {
+func (set HashSet[E]) Equals(otherSet ComparableSet[E]) bool {
 	return set.Size() == otherSet.Size() && set.IsSubsetOf(otherSet)
 }
 
-func (set HashSet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
-	for item := range set.items {
-		if !otherSet.Contains(item) {
+func (set HashSet[E]) IsSubsetOf(otherSet ComparableSet[E]) bool {
+	for element := range set.elements {
+		if !otherSet.Contains(element) {
 			return false
 		}
 	}
@@ -108,36 +108,36 @@ func (set HashSet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
 	return true
 }
 
-func (set HashSet[T]) IsSupersetOf(otherSet ComparableSet[T]) bool {
+func (set HashSet[E]) IsSupersetOf(otherSet ComparableSet[E]) bool {
 	return otherSet.IsSubsetOf(set)
 }
 
-func (set HashSet[T]) Union(otherSet ComparableSet[T]) Set[T] {
+func (set HashSet[E]) Union(otherSet ComparableSet[E]) Set[E] {
 	union := set.UnionHashSet(otherSet)
 	return &union
 }
 
-func (set HashSet[T]) UnionHashSet(otherSet ComparableSet[T]) HashSet[T] {
-	union := HashSetWithCapacity[T](set.Size() + otherSet.Size())
+func (set HashSet[E]) UnionHashSet(otherSet ComparableSet[E]) HashSet[E] {
+	union := HashSetWithCapacity[E](set.Size() + otherSet.Size())
 
-	for item := range set.items {
-		union.Add(item)
+	for element := range set.elements {
+		union.Add(element)
 	}
 
-	otherSet.Iterate(func(item T) bool {
-		union.Add(item)
+	otherSet.Iterate(func(element E) bool {
+		union.Add(element)
 		return true
 	})
 
 	return union
 }
 
-func (set HashSet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
+func (set HashSet[E]) Intersection(otherSet ComparableSet[E]) Set[E] {
 	intersection := set.IntersectionHashSet(otherSet)
 	return &intersection
 }
 
-func (set HashSet[T]) IntersectionHashSet(otherSet ComparableSet[T]) HashSet[T] {
+func (set HashSet[E]) IntersectionHashSet(otherSet ComparableSet[E]) HashSet[E] {
 	var capacity int
 	if set.Size() < otherSet.Size() {
 		capacity = set.Size()
@@ -145,58 +145,58 @@ func (set HashSet[T]) IntersectionHashSet(otherSet ComparableSet[T]) HashSet[T] 
 		capacity = otherSet.Size()
 	}
 
-	intersection := HashSetWithCapacity[T](capacity)
-	for item := range set.items {
-		if otherSet.Contains(item) {
-			intersection.Add(item)
+	intersection := HashSetWithCapacity[E](capacity)
+	for element := range set.elements {
+		if otherSet.Contains(element) {
+			intersection.Add(element)
 		}
 	}
 
 	return intersection
 }
 
-func (set HashSet[T]) ToSlice() []T {
-	slice := make([]T, len(set.items))
+func (set HashSet[E]) ToSlice() []E {
+	slice := make([]E, len(set.elements))
 
 	i := 0
-	for item := range set.items {
-		slice[i] = item
+	for element := range set.elements {
+		slice[i] = element
 		i++
 	}
 
 	return slice
 }
 
-func (set HashSet[T]) ToMap() map[T]struct{} {
-	m := make(map[T]struct{}, len(set.items))
+func (set HashSet[E]) ToMap() map[E]struct{} {
+	m := make(map[E]struct{}, len(set.elements))
 
-	for item := range set.items {
-		m[item] = struct{}{}
+	for element := range set.elements {
+		m[element] = struct{}{}
 	}
 
 	return m
 }
 
-func (set HashSet[T]) ToArraySet() ArraySet[T] {
-	arraySet := ArraySet[T]{items: make([]T, len(set.items))}
+func (set HashSet[E]) ToArraySet() ArraySet[E] {
+	arraySet := ArraySet[E]{elements: make([]E, len(set.elements))}
 
 	i := 0
-	for item := range set.items {
-		arraySet.items[i] = item
+	for element := range set.elements {
+		arraySet.elements[i] = element
 		i++
 	}
 
 	return arraySet
 }
 
-func (set HashSet[T]) ToHashSet() HashSet[T] {
+func (set HashSet[E]) ToHashSet() HashSet[E] {
 	return set.CopyHashSet()
 }
 
-func (set HashSet[T]) ToDynamicSet() DynamicSet[T] {
-	dynamicSet := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
+func (set HashSet[E]) ToDynamicSet() DynamicSet[E] {
+	dynamicSet := DynamicSet[E]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if len(set.items) >= dynamicSet.sizeThreshold {
+	if len(set.elements) >= dynamicSet.sizeThreshold {
 		dynamicSet.hash = set.CopyHashSet()
 		return dynamicSet
 	} else {
@@ -205,30 +205,30 @@ func (set HashSet[T]) ToDynamicSet() DynamicSet[T] {
 	}
 }
 
-func (set HashSet[T]) Copy() Set[T] {
+func (set HashSet[E]) Copy() Set[E] {
 	newSet := set.CopyHashSet()
 	return &newSet
 }
 
-func (set HashSet[T]) CopyHashSet() HashSet[T] {
-	newSet := HashSet[T]{items: make(map[T]struct{}, len(set.items))}
+func (set HashSet[E]) CopyHashSet() HashSet[E] {
+	newSet := HashSet[E]{elements: make(map[E]struct{}, len(set.elements))}
 
-	for item := range set.items {
-		newSet.items[item] = struct{}{}
+	for element := range set.elements {
+		newSet.elements[element] = struct{}{}
 	}
 
 	return newSet
 }
 
-func (set HashSet[T]) String() string {
+func (set HashSet[E]) String() string {
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("HashSet{")
 
 	i := 0
-	for item := range set.items {
-		fmt.Fprint(&stringBuilder, item)
+	for element := range set.elements {
+		fmt.Fprint(&stringBuilder, element)
 
-		if i < len(set.items)-1 {
+		if i < len(set.elements)-1 {
 			stringBuilder.WriteString(", ")
 		}
 
@@ -239,9 +239,9 @@ func (set HashSet[T]) String() string {
 	return stringBuilder.String()
 }
 
-func (set HashSet[T]) Iterate(yield func(T) bool) bool {
-	for item := range set.items {
-		if !yield(item) {
+func (set HashSet[E]) Iterate(yield func(E) bool) bool {
+	for element := range set.elements {
+		if !yield(element) {
 			return false
 		}
 	}

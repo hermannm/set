@@ -5,90 +5,90 @@ import (
 	"strings"
 )
 
-type ArraySet[T comparable] struct {
-	items []T
+type ArraySet[E comparable] struct {
+	elements []E
 }
 
 var _ Set[int] = (*ArraySet[int])(nil)
 var _ ComparableSet[int] = ArraySet[int]{}
 
-func NewArraySet[T comparable]() ArraySet[T] {
-	return ArraySet[T]{items: nil}
+func NewArraySet[E comparable]() ArraySet[E] {
+	return ArraySet[E]{elements: nil}
 }
 
-func ArraySetWithCapacity[T comparable](capacity int) ArraySet[T] {
-	return ArraySet[T]{items: make([]T, 0, capacity)}
+func ArraySetWithCapacity[E comparable](capacity int) ArraySet[E] {
+	return ArraySet[E]{elements: make([]E, 0, capacity)}
 }
 
-func ArraySetOf[T comparable](items ...T) ArraySet[T] {
-	return ArraySetFromSlice(items)
+func ArraySetOf[E comparable](elements ...E) ArraySet[E] {
+	return ArraySetFromSlice(elements)
 }
 
-func ArraySetFromSlice[T comparable](items []T) ArraySet[T] {
-	set := ArraySet[T]{items: make([]T, 0, len(items))}
+func ArraySetFromSlice[E comparable](elements []E) ArraySet[E] {
+	set := ArraySet[E]{elements: make([]E, 0, len(elements))}
 
-	for _, item := range items {
-		if set.Contains(item) {
+	for _, element := range elements {
+		if set.Contains(element) {
 			continue
 		}
 
-		set.items = append(set.items, item)
+		set.elements = append(set.elements, element)
 	}
 
 	return set
 }
 
-func (set *ArraySet[T]) Add(item T) {
-	for _, alreadyAdded := range set.items {
-		if item == alreadyAdded {
+func (set *ArraySet[E]) Add(element E) {
+	for _, alreadyAdded := range set.elements {
+		if element == alreadyAdded {
 			return
 		}
 	}
 
-	set.items = append(set.items, item)
+	set.elements = append(set.elements, element)
 }
 
-func (set *ArraySet[T]) AddMultiple(items ...T) {
-	set.AddFromSlice(items)
+func (set *ArraySet[E]) AddMultiple(elements ...E) {
+	set.AddFromSlice(elements)
 }
 
-func (set *ArraySet[T]) AddFromSlice(items []T) {
-	if set.items == nil {
-		set.items = make([]T, 0, len(items))
+func (set *ArraySet[E]) AddFromSlice(elements []E) {
+	if set.elements == nil {
+		set.elements = make([]E, 0, len(elements))
 	}
 
-	for _, item := range items {
-		set.Add(item)
+	for _, element := range elements {
+		set.Add(element)
 	}
 }
 
-func (set *ArraySet[T]) MergeWith(otherSet ComparableSet[T]) {
-	if set.items == nil {
-		set.items = make([]T, 0, otherSet.Size())
+func (set *ArraySet[E]) MergeWith(otherSet ComparableSet[E]) {
+	if set.elements == nil {
+		set.elements = make([]E, 0, otherSet.Size())
 	}
 
-	otherSet.Iterate(func(item T) bool {
-		set.Add(item)
+	otherSet.Iterate(func(element E) bool {
+		set.Add(element)
 		return true
 	})
 }
 
-func (set *ArraySet[T]) Remove(item T) {
-	for i, candidate := range set.items {
-		if item == candidate {
-			set.items = append(set.items[:i], set.items[i+1:]...)
+func (set *ArraySet[E]) Remove(element E) {
+	for i, candidate := range set.elements {
+		if element == candidate {
+			set.elements = append(set.elements[:i], set.elements[i+1:]...)
 			return
 		}
 	}
 }
 
-func (set *ArraySet[T]) Clear() {
-	set.items = set.items[:0]
+func (set *ArraySet[E]) Clear() {
+	set.elements = set.elements[:0]
 }
 
-func (set ArraySet[T]) Contains(item T) bool {
-	for _, candidate := range set.items {
-		if item == candidate {
+func (set ArraySet[E]) Contains(element E) bool {
+	for _, candidate := range set.elements {
+		if element == candidate {
 			return true
 		}
 	}
@@ -96,21 +96,21 @@ func (set ArraySet[T]) Contains(item T) bool {
 	return false
 }
 
-func (set ArraySet[T]) Size() int {
-	return len(set.items)
+func (set ArraySet[E]) Size() int {
+	return len(set.elements)
 }
 
-func (set ArraySet[T]) IsEmpty() bool {
-	return len(set.items) == 0
+func (set ArraySet[E]) IsEmpty() bool {
+	return len(set.elements) == 0
 }
 
-func (set ArraySet[T]) Equals(otherSet ComparableSet[T]) bool {
+func (set ArraySet[E]) Equals(otherSet ComparableSet[E]) bool {
 	return set.Size() == otherSet.Size() && set.IsSubsetOf(otherSet)
 }
 
-func (set ArraySet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
-	for _, item := range set.items {
-		if !otherSet.Contains(item) {
+func (set ArraySet[E]) IsSubsetOf(otherSet ComparableSet[E]) bool {
+	for _, element := range set.elements {
+		if !otherSet.Contains(element) {
 			return false
 		}
 	}
@@ -118,36 +118,36 @@ func (set ArraySet[T]) IsSubsetOf(otherSet ComparableSet[T]) bool {
 	return true
 }
 
-func (set ArraySet[T]) IsSupersetOf(otherSet ComparableSet[T]) bool {
+func (set ArraySet[E]) IsSupersetOf(otherSet ComparableSet[E]) bool {
 	return otherSet.IsSubsetOf(set)
 }
 
-func (set ArraySet[T]) Union(otherSet ComparableSet[T]) Set[T] {
+func (set ArraySet[E]) Union(otherSet ComparableSet[E]) Set[E] {
 	union := set.UnionArraySet(otherSet)
 	return &union
 }
 
-func (set ArraySet[T]) UnionArraySet(otherSet ComparableSet[T]) ArraySet[T] {
-	union := ArraySetWithCapacity[T](set.Size() + otherSet.Size())
+func (set ArraySet[E]) UnionArraySet(otherSet ComparableSet[E]) ArraySet[E] {
+	union := ArraySetWithCapacity[E](set.Size() + otherSet.Size())
 
-	for _, item := range set.items {
-		union.Add(item)
+	for _, element := range set.elements {
+		union.Add(element)
 	}
 
-	otherSet.Iterate(func(item T) bool {
-		union.Add(item)
+	otherSet.Iterate(func(element E) bool {
+		union.Add(element)
 		return true
 	})
 
 	return union
 }
 
-func (set ArraySet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
+func (set ArraySet[E]) Intersection(otherSet ComparableSet[E]) Set[E] {
 	intersection := set.IntersectionArraySet(otherSet)
 	return &intersection
 }
 
-func (set ArraySet[T]) IntersectionArraySet(otherSet ComparableSet[T]) ArraySet[T] {
+func (set ArraySet[E]) IntersectionArraySet(otherSet ComparableSet[E]) ArraySet[E] {
 	var capacity int
 	if set.Size() < otherSet.Size() {
 		capacity = set.Size()
@@ -155,50 +155,50 @@ func (set ArraySet[T]) IntersectionArraySet(otherSet ComparableSet[T]) ArraySet[
 		capacity = otherSet.Size()
 	}
 
-	intersection := ArraySetWithCapacity[T](capacity)
-	for _, item := range set.items {
-		if otherSet.Contains(item) {
-			intersection.Add(item)
+	intersection := ArraySetWithCapacity[E](capacity)
+	for _, element := range set.elements {
+		if otherSet.Contains(element) {
+			intersection.Add(element)
 		}
 	}
 
 	return intersection
 }
 
-func (set ArraySet[T]) ToSlice() []T {
-	slice := make([]T, len(set.items))
-	copy(slice, set.items)
+func (set ArraySet[E]) ToSlice() []E {
+	slice := make([]E, len(set.elements))
+	copy(slice, set.elements)
 	return slice
 }
 
-func (set ArraySet[T]) ToMap() map[T]struct{} {
-	m := make(map[T]struct{}, len(set.items))
+func (set ArraySet[E]) ToMap() map[E]struct{} {
+	m := make(map[E]struct{}, len(set.elements))
 
-	for _, item := range set.items {
-		m[item] = struct{}{}
+	for _, element := range set.elements {
+		m[element] = struct{}{}
 	}
 
 	return m
 }
 
-func (set ArraySet[T]) ToArraySet() ArraySet[T] {
+func (set ArraySet[E]) ToArraySet() ArraySet[E] {
 	return set.CopyArraySet()
 }
 
-func (set ArraySet[T]) ToHashSet() HashSet[T] {
-	hashSet := HashSet[T]{items: make(map[T]struct{}, len(set.items))}
+func (set ArraySet[E]) ToHashSet() HashSet[E] {
+	hashSet := HashSet[E]{elements: make(map[E]struct{}, len(set.elements))}
 
-	for _, item := range set.items {
-		hashSet.items[item] = struct{}{}
+	for _, element := range set.elements {
+		hashSet.elements[element] = struct{}{}
 	}
 
 	return hashSet
 }
 
-func (set ArraySet[T]) ToDynamicSet() DynamicSet[T] {
-	dynamicSet := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
+func (set ArraySet[E]) ToDynamicSet() DynamicSet[E] {
+	dynamicSet := DynamicSet[E]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if len(set.items) < dynamicSet.sizeThreshold {
+	if len(set.elements) < dynamicSet.sizeThreshold {
 		dynamicSet.array = set.CopyArraySet()
 		return dynamicSet
 	} else {
@@ -207,25 +207,25 @@ func (set ArraySet[T]) ToDynamicSet() DynamicSet[T] {
 	}
 }
 
-func (set ArraySet[T]) Copy() Set[T] {
+func (set ArraySet[E]) Copy() Set[E] {
 	newSet := set.CopyArraySet()
 	return &newSet
 }
 
-func (set ArraySet[T]) CopyArraySet() ArraySet[T] {
-	newSet := ArraySet[T]{items: make([]T, len(set.items), cap(set.items))}
-	copy(newSet.items, set.items)
+func (set ArraySet[E]) CopyArraySet() ArraySet[E] {
+	newSet := ArraySet[E]{elements: make([]E, len(set.elements), cap(set.elements))}
+	copy(newSet.elements, set.elements)
 	return newSet
 }
 
-func (set ArraySet[T]) String() string {
+func (set ArraySet[E]) String() string {
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("ArraySet{")
 
-	for i, item := range set.items {
-		fmt.Fprint(&stringBuilder, item)
+	for i, element := range set.elements {
+		fmt.Fprint(&stringBuilder, element)
 
-		if i < len(set.items)-1 {
+		if i < len(set.elements)-1 {
 			stringBuilder.WriteString(", ")
 		}
 	}
@@ -234,9 +234,9 @@ func (set ArraySet[T]) String() string {
 	return stringBuilder.String()
 }
 
-func (set ArraySet[T]) Iterate(yield func(T) bool) bool {
-	for _, item := range set.items {
-		if !yield(item) {
+func (set ArraySet[E]) Iterate(yield func(E) bool) bool {
+	for _, element := range set.elements {
+		if !yield(element) {
 			return false
 		}
 	}
