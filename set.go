@@ -29,7 +29,7 @@ type Set[E comparable] interface {
 	// If the element is not present in the set, Remove is a no-op.
 	Remove(element E)
 
-	// Clear removes all elements from the set, leaving an empty set with the same capacity as
+	// Clear removes all elements from the set. When possible, it will retain the same capacity as
 	// before.
 	Clear()
 }
@@ -45,17 +45,17 @@ type ComparableSet[E comparable] interface {
 	// IsEmpty checks if there are 0 elements in the set.
 	IsEmpty() bool
 
-	// Equals check if the set contains exactly the same elements as the other given set.
+	// Equals checks if the set contains exactly the same elements as the other given set.
 	Equals(otherSet ComparableSet[E]) bool
 
 	// IsSubsetOf checks if all of the elements in the set exist in the other given set.
 	IsSubsetOf(otherSet ComparableSet[E]) bool
 
-	// IsSupersetOf checks if hte set contains all of the elements in the other given set.
+	// IsSupersetOf checks if the set contains all of the elements in the other given set.
 	IsSupersetOf(otherSet ComparableSet[E]) bool
 
-	// Union creates a new set that contains all the elements of receiver set and the other given
-	// set. The underlying type of the returned set will be the same as the receiver.
+	// Union creates a new set that contains all the elements of the receiver set and the other
+	// given set. The underlying type of the returned set will be the same as the receiver.
 	Union(otherSet ComparableSet[E]) Set[E]
 
 	// Intersection creates a new set with only the elements that exist in both the receiver set and
@@ -84,11 +84,11 @@ type ComparableSet[E comparable] interface {
 	// If the set is already a DynamicSet, this is equivalent to calling CopyDynamicSet on it.
 	ToDynamicSet() DynamicSet[E]
 
-	// Copy creates a new set with all the same elements as the set it is called on, and the same
+	// Copy creates a new set with all the same elements as the original set, and the same
 	// underlying type.
 	Copy() Set[E]
 
-	// String implements [fmt.Stringer] to customize the print format of the Set.
+	// String returns a string representation of the set, implementing [fmt.Stringer].
 	//
 	// Since sets are unordered, the order of elements in the string may differ each time it is
 	// called.
