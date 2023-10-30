@@ -7,377 +7,371 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	newSet := set.New[string]()
-
-	if newSet == nil {
-		t.Error("expected set.New to give non-nil set")
-	}
-
-	if size := newSet.Size(); size != 0 {
-		t.Errorf("expected set from set.New to have size 0, got %d", size)
+	for _, set := range []testSet{
+		{set.NewArraySet[int](), "ArraySet"},
+		{set.NewHashSet[int](), "HashSet"},
+		{set.NewDynamicSet[int](), "DynamicSet"},
+	} {
+		assertSize(t, set, 0)
 	}
 }
 
 func TestWithCapacity(t *testing.T) {
-	newSet := set.WithCapacity[string](3)
-
-	if newSet == nil {
-		t.Error("expected set.WithCapacity to give non-nil set")
-	}
-
-	if size := newSet.Size(); size != 0 {
-		t.Errorf("expected set from set.WithCapacity to have size 0, got %d", size)
+	for _, set := range []testSet{
+		{set.ArraySetWithCapacity[int](5), "ArraySet"},
+		{set.HashSetWithCapacity[int](5), "HashSet"},
+		{set.DynamicSetWithCapacity[int](5), "DynamicSet"},
+	} {
+		assertSize(t, set, 0)
 	}
 }
 
 func TestOf(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
-
-	if numbers == nil {
-		t.Error("expected set.Of to give non-nil set")
-	}
-
-	if size := numbers.Size(); size != 3 {
-		t.Errorf("expected set from set.Of(1, 2, 3) to have size 3, got %d", size)
+	for _, set := range []testSet{
+		{set.ArraySetOf(1, 2, 3), "ArraySet"},
+		{set.HashSetOf(1, 2, 3), "HashSet"},
+		{set.DynamicSetOf(1, 2, 3), "DynamicSet"},
+	} {
+		assertSize(t, set, 3)
+		assertContains(t, set, 1, 2, 3)
 	}
 }
 
 func TestFromSlice(t *testing.T) {
-	numberSlice := []int{1, 2, 3}
-	numberSet := set.FromSlice(numberSlice)
+	slice := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-	if numberSet == nil {
-		t.Error("expected set.FromSlice to give non-nil set")
-	}
-
-	setSize := numberSet.Size()
-	sliceLength := len(numberSlice)
-	if setSize != sliceLength {
-		t.Errorf(
-			"expected set from set.FromSlice to have size equal to slice length %d, got %d",
-			sliceLength,
-			setSize,
-		)
+	for _, set := range []testSet{
+		{set.ArraySetFromSlice(slice), "ArraySet"},
+		{set.HashSetFromSlice(slice), "HashSet"},
+		{set.DynamicSetFromSlice(slice), "DynamicSet"},
+	} {
+		assertSize(t, set, len(slice))
+		assertContains(t, set, slice...)
 	}
 }
 
 func TestFromSliceWithDuplicates(t *testing.T) {
-	numbersWithDuplicates := []int{1, 1, 2, 2}
-	numbersWithoutDuplicates := set.FromSlice(numbersWithDuplicates)
+	slice := []int{1, 1, 2, 2}
 
-	if size := numbersWithoutDuplicates.Size(); size != 2 {
-		t.Errorf("expected size 2 from set of 2 unique elements, got %d", size)
+	for _, set := range []testSet{
+		{set.ArraySetFromSlice(slice), "ArraySet"},
+		{set.HashSetFromSlice(slice), "HashSet"},
+		{set.DynamicSetFromSlice(slice), "DynamicSet"},
+	} {
+		assertSize(t, set, 2)
+		assertContains(t, set, 1, 2)
 	}
 }
 
 func TestAdd(t *testing.T) {
-	numbers := set.New[int]()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.Add(1)
 
-	numbers.Add(1)
-
-	if size := numbers.Size(); size != 1 {
-		t.Errorf("expected set size to be 1 after one Add(), got %d", size)
-	}
-
-	if !setContainsAll(numbers, 1) {
-		t.Errorf("expected Set{1} after Add(1), got %v", numbers)
-	}
+		assertSize(t, set, 1)
+		assertContains(t, set, 1)
+	})
 }
 
 func TestAddDuplicate(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
-	size1 := numbers.Size()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+		set.Add(3)
 
-	numbers.Add(3)
-	size2 := numbers.Size()
-
-	if size1 != size2 {
-		t.Errorf(
-			"expected adding of existing element to not change set size %d, but got %d",
-			size1,
-			size2,
-		)
-	}
+		assertSize(t, set, 3)
+	})
 }
 
-func TestAddToNil(t *testing.T) {
-	defer func() {
-		err := recover()
+func TestAddMultiple(t *testing.T) {
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-		if err == nil {
-			t.Error("expected adding to nil set to panic")
-		}
+		assertSize(t, set, 3)
+		assertContains(t, set, 1, 2, 3)
+	})
+}
 
-		errMessage, ok := err.(string)
-		if !ok {
-			t.Errorf("expected Add to panic with string, got %v", err)
-		}
+func TestAddFromSlice(t *testing.T) {
+	slice := []int{1, 2, 3, 3}
 
-		if expectedMessage := "called Add on nil Set"; errMessage != expectedMessage {
-			t.Errorf(
-				"expected Add to panic with message '%s', got '%s'",
-				expectedMessage,
-				errMessage,
-			)
-		}
-	}()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddFromSlice(slice)
 
-	var nilSet set.Set[string]
-	nilSet.Add("test")
+		assertSize(t, set, 3)
+		assertContains(t, set, 1, 2, 3)
+	})
+}
+
+func TestMergeWith(t *testing.T) {
+	otherSet := set.ArraySetOf(3, 4, 5)
+
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+
+		set.MergeWith(otherSet)
+
+		assertSize(t, set, 5)
+		assertContains(t, set, 1, 2, 3, 4, 5)
+	})
 }
 
 func TestRemove(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	numbers.Remove(3)
+		set.Remove(3)
 
-	if size := numbers.Size(); size != 2 {
-		t.Errorf("expected size 2 after removing from 3-element set, got %d", size)
-	}
-
-	if !setContainsAll(numbers, 1, 2) {
-		t.Errorf("expected Set{1, 2} after removing 3 from Set{1, 2, 3}, got %v", numbers)
-	}
+		assertSize(t, set, 2)
+		assertContains(t, set, 1, 2)
+	})
 }
 
 func TestRemoveNonExisting(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	numbers.Remove(4)
+		set.Remove(4)
 
-	if size := numbers.Size(); size != 3 {
-		t.Errorf("expected unchanged size 3 after removing non-existing element, got %d", size)
-	}
-
-	if !setContainsAll(numbers, 1, 2, 3) {
-		t.Errorf("expected unchanged Set{1, 2, 3} after removing 4, got %v", numbers)
-	}
+		assertSize(t, set, 3)
+		assertContains(t, set, 1, 2, 3)
+	})
 }
 
 func TestClear(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	numbers.Clear()
+		set.Clear()
 
-	if size := numbers.Size(); size != 0 {
-		t.Errorf("expected size 0 after clearing set, got %d", size)
-	}
+		assertSize(t, set, 0)
+	})
 }
 
 func TestSize(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	if size := numbers.Size(); size != 3 {
-		t.Errorf("expected %v to have size 3, got %d", numbers, size)
-	}
+		if size := set.Size(); size != 3 {
+			t.Errorf("expected %v to have size 3, got %d", set, size)
+		}
+	})
 }
 
 func TestIsEmpty(t *testing.T) {
-	newSet := set.New[string]()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		if !set.IsEmpty() {
+			t.Errorf("expected %v.IsEmpty() == true", set)
+		}
 
-	if isEmpty := newSet.IsEmpty(); !isEmpty {
-		t.Errorf("expected %v.IsEmpty() = true, got %v", newSet, isEmpty)
-	}
+		set.Add(1)
 
-	numbers := set.Of(1, 2, 3)
-
-	if isEmpty := numbers.IsEmpty(); isEmpty {
-		t.Errorf("expected %v.IsEmpty() = false, got %v", numbers, isEmpty)
-	}
+		if set.IsEmpty() {
+			t.Errorf("expected %v.IsEmpty() == false", set)
+		}
+	})
 }
 
 func TestContains(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	if contains := numbers.Contains(3); !contains {
-		t.Errorf("expected %v.Contains(3) = true, got %v", numbers, contains)
-	}
+		if !set.Contains(3) {
+			t.Errorf("expected %v.Contains(3) == true", set)
+		}
 
-	if contains := numbers.Contains(4); contains {
-		t.Errorf("expected %v.Contains(4) = false, got %v", numbers, contains)
-	}
+		if set.Contains(4) {
+			t.Errorf("expected %v.Contains(4) == false", set)
+		}
+	})
 }
 
 func TestEquals(t *testing.T) {
-	numbers1 := set.Of(1, 2, 3)
-	numbers2 := set.Of(1, 2, 3)
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3)
 
-	if equal := numbers1.Equals(numbers2); !equal {
-		t.Errorf("expected %v.Equals(%v) = true, got %v", numbers1, numbers2, equal)
-	}
+		set2 := set.ArraySetOf(1, 2, 3)
 
-	numbers3 := set.Of(1, 2, 4)
+		if !set1.Equals(set2) {
+			t.Errorf("expected %v.Equals(%v) == true", set1, set2)
+		}
 
-	if equal := numbers1.Equals(numbers3); equal {
-		t.Errorf("expected %v.Equals(%v) = false, got %v", numbers1, numbers3, equal)
-	}
+		set3 := set.ArraySetOf(1, 2, 4)
+
+		if set1.Equals(set3) {
+			t.Errorf("expected %v.Equals(%v) == false", set1, set3)
+		}
+	})
 }
 
 func TestIsSubsetOf(t *testing.T) {
-	numbers1 := set.Of(1, 2, 3)
-	numbers2 := set.Of(1, 2, 3, 4, 5, 6)
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3)
+		set2 := set.HashSetOf(1, 2, 3, 4, 5, 6)
 
-	if isSubset := numbers1.IsSubsetOf(numbers2); !isSubset {
-		t.Errorf("expected %v.IsSubsetOf(%v) = true, got %v", numbers1, numbers2, isSubset)
-	}
+		if !set1.IsSubsetOf(set2) {
+			t.Errorf("expected %v.IsSubsetOf(%v) == true", set1, set2)
+		}
 
-	if isSubset := numbers2.IsSubsetOf(numbers1); isSubset {
-		t.Errorf("expected %v.IsSubsetOf(%v) = false, got %v", numbers2, numbers1, isSubset)
-	}
+		if set2.IsSubsetOf(set1) {
+			t.Errorf("expected %v.IsSubsetOf(%v) == false", set2, set1)
+		}
+	})
 }
 
 func TestIsSupersetOf(t *testing.T) {
-	numbers1 := set.Of("test1", "test2", "test3")
-	numbers2 := set.Of("test1", "test2")
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3, 4, 5, 6)
+		set2 := set.ArraySetOf(1, 2, 3)
 
-	if isSuperset := numbers1.IsSupersetOf(numbers2); !isSuperset {
-		t.Errorf("expected %v.IsSupersetOf(%v) = true, got %v", numbers1, numbers2, isSuperset)
-	}
+		if !set1.IsSupersetOf(set2) {
+			t.Errorf("expected %v.IsSupersetOf(%v) == true", set1, set2)
+		}
 
-	if isSuperset := numbers2.IsSupersetOf(numbers1); isSuperset {
-		t.Errorf("expected %v.IsSupersetOf(%v) = false, got %v", numbers2, numbers1, isSuperset)
-	}
+		if set2.IsSupersetOf(set1) {
+			t.Errorf("expected %v.IsSupersetOf(%v) == false", set2, set1)
+		}
+	})
 }
 
 func TestToSlice(t *testing.T) {
-	numberSet := set.Of(1, 2, 3)
-	numberSlice := numberSet.ToSlice()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+		slice := set.ToSlice()
 
-	setSize := numberSet.Size()
-	sliceLength := len(numberSlice)
-	if setSize != sliceLength {
-		t.Errorf(
-			"expected %v.Size() = len(%v), got set size %d and slice length %d",
-			numberSet,
-			numberSlice,
-			setSize,
-			sliceLength,
-		)
-	}
+		assertSize(t, set, len(slice))
 
-	for setElement := range numberSet {
-		containedInSlice := false
+		set.Iterate(func(setElement int) bool {
+			containedInSlice := false
 
-		for _, sliceElement := range numberSlice {
-			if setElement == sliceElement {
-				containedInSlice = true
-				break
+			for _, sliceElement := range slice {
+				if setElement == sliceElement {
+					containedInSlice = true
+					break
+				}
 			}
-		}
 
-		if !containedInSlice {
-			t.Errorf(
-				"expected %v to contain all elements of %v, but did not contain %v",
-				numberSlice,
-				numberSet,
-				setElement,
-			)
-		}
-	}
+			if !containedInSlice {
+				t.Errorf(
+					"expected %v to contain all elements of %v, but did not contain %v",
+					slice,
+					set,
+					setElement,
+				)
+			}
+
+			return true
+		})
+	})
 }
 
 func TestCopy(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
-	numbersCopy := numbers.Copy()
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+		setCopy := set.Copy()
 
-	if !setContainsAll(numbersCopy, 1, 2, 3) {
-		t.Errorf("expected copy %v to contain all elements of original %v", numbersCopy, numbers)
-	}
+		assertContains(t, setCopy, 1, 2, 3)
 
-	numbers.Add(4)
+		set.Add(4)
 
-	if size := numbersCopy.Size(); size != 3 {
-		t.Errorf("expected unchanged size 3 of copy after adding to original set, got %d", size)
-	}
+		assertSize(t, setCopy, 3)
+	})
 }
 
 func TestString(t *testing.T) {
-	numbers := set.Of(1, 2, 3)
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
 
-	numbersString := numbers.String()
-	expectedStrings := []string{
-		"Set{1, 2, 3}",
-		"Set{1, 3, 2}",
-		"Set{2, 1, 3}",
-		"Set{2, 3, 1}",
-		"Set{3, 1, 2}",
-		"Set{3, 2, 1}",
-	}
-
-	isExpectedString := false
-	for _, expected := range expectedStrings {
-		if numbersString == expected {
-			isExpectedString = true
+		setString := set.String()
+		expectedStrings := []string{
+			setName + "{1, 2, 3}",
+			setName + "{1, 3, 2}",
+			setName + "{2, 1, 3}",
+			setName + "{2, 3, 1}",
+			setName + "{3, 1, 2}",
+			setName + "{3, 2, 1}",
 		}
-	}
 
-	if !isExpectedString {
-		t.Errorf(
-			"expected %v.String() to equal one of the strings %v, got %s",
-			numbers,
-			expectedStrings,
-			numbersString,
-		)
-	}
+		isExpectedString := false
+		for _, expected := range expectedStrings {
+			if setString == expected {
+				isExpectedString = true
+			}
+		}
+
+		if !isExpectedString {
+			t.Errorf(
+				"expected %v.String() to equal one of the strings %v, got %s",
+				set,
+				expectedStrings,
+				setString,
+			)
+		}
+	})
 }
 
 func TestStringEmptySet(t *testing.T) {
-	emptySet := set.New[string]()
-
-	expected := "Set{}"
-	actual := emptySet.String()
-	if expected != actual {
-		t.Errorf("expected %v.String() = %s, got %s", emptySet, expected, actual)
-	}
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		expected := setName + "{}"
+		actual := set.String()
+		if expected != actual {
+			t.Errorf("expected %v.String() == %s, got %s", set, expected, actual)
+		}
+	})
 }
 
 func TestUnion(t *testing.T) {
-	numbers1 := set.Of(1, 2, 3)
-	numbers2 := set.Of(3, 4, 5)
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3)
+		set2 := set.ArraySetOf(3, 4, 5)
 
-	union := set.Union(numbers1, numbers2)
+		union := set1.Union(set2)
 
-	if size := union.Size(); size != 5 {
-		t.Errorf("expected union %v.Size() = 5, got %d", union, size)
-	}
-
-	if !setContainsAll(union, 1, 2, 3, 4, 5) {
-		t.Errorf(
-			"expected union %v to contain all elements of component sets %v and %v",
-			union,
-			numbers1,
-			numbers2,
-		)
-	}
+		assertSize(t, union, 5)
+		assertContains(t, union, 1, 2, 3, 4, 5)
+	})
 }
 
 func TestIntersection(t *testing.T) {
-	numbers1 := set.Of(1, 2, 3, 4)
-	numbers2 := set.Of(2, 3, 4, 5)
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3, 4)
+		set2 := set.HashSetOf(2, 3, 4, 5)
 
-	intersection := set.Intersection(numbers1, numbers2)
+		intersection := set1.Intersection(set2)
 
-	if size := intersection.Size(); size != 3 {
-		t.Errorf("expected intersection %v.Size() = 3, got %d", intersection, size)
-	}
+		assertSize(t, intersection, 3)
+		assertContains(t, intersection, 2, 3, 4)
+	})
+}
 
-	if !setContainsAll(intersection, 2, 3, 4) {
-		t.Errorf(
-			"expected intersection %v to contain shared elements of component sets %v and %v",
-			intersection,
-			numbers1,
-			numbers2,
-		)
+type testSet struct {
+	set.ComparableSet[int]
+	name string
+}
+
+func testAllSetTypes(testFunc func(set set.Set[int], setName string)) {
+	testFunc(&set.ArraySet[int]{}, "ArraySet")
+	testFunc(&set.HashSet[int]{}, "HashSet")
+	testFunc(&set.DynamicSet[int]{}, "DynamicSet")
+}
+
+func assertSize[E comparable, Set set.ComparableSet[E]](t *testing.T, set Set, expectedSize int) {
+	t.Helper()
+
+	if actualSize := set.Size(); actualSize != expectedSize {
+		t.Errorf("expected %s.Size() == %d, got %d", set.String(), expectedSize, actualSize)
 	}
 }
 
-// setContainsAll checks that the given set contains all of the given elements.
-func setContainsAll[Element comparable](set set.Set[Element], elements ...Element) bool {
-	for _, element := range elements {
+func assertContains[E comparable, Set set.ComparableSet[E]](
+	t *testing.T,
+	set Set,
+	expectedElements ...E,
+) {
+	t.Helper()
+
+	for _, element := range expectedElements {
 		if !set.Contains(element) {
-			return false
+			t.Errorf("expected %s to contain %v", set.String(), expectedElements)
+			return
 		}
 	}
-
-	return true
 }
