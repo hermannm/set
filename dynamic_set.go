@@ -6,28 +6,28 @@ import (
 )
 
 type DynamicSet[T comparable] struct {
-	resizeCutoff int
-	array        ArraySet[T]
-	hash         HashSet[T]
+	sizeThreshold int
+	array         ArraySet[T]
+	hash          HashSet[T]
 }
 
 var _ Set[int] = (*DynamicSet[int])(nil)
 var _ ComparableSet[int] = DynamicSet[int]{}
 
-const DefaultDynamicSetResizeCutoff = 20
+const DefaultDynamicSetSizeThreshold = 20
 
 func NewDynamicSet[T comparable]() DynamicSet[T] {
 	return DynamicSet[T]{
-		resizeCutoff: DefaultDynamicSetResizeCutoff,
-		array:        ArraySet[T]{items: nil},
-		hash:         HashSet[T]{items: nil},
+		sizeThreshold: DefaultDynamicSetSizeThreshold,
+		array:         ArraySet[T]{items: nil},
+		hash:          HashSet[T]{items: nil},
 	}
 }
 
 func DynamicSetWithCapacity[T comparable](capacity int) DynamicSet[T] {
-	set := DynamicSet[T]{resizeCutoff: DefaultDynamicSetResizeCutoff}
+	set := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if capacity < set.resizeCutoff {
+	if capacity < set.sizeThreshold {
 		set.array = ArraySet[T]{items: make([]T, 0, capacity)}
 	} else {
 		set.hash = HashSetWithCapacity[T](capacity)
@@ -41,9 +41,9 @@ func DynamicSetOf[T comparable](items ...T) DynamicSet[T] {
 }
 
 func DynamicSetFromSlice[T comparable](items []T) DynamicSet[T] {
-	set := DynamicSet[T]{resizeCutoff: DefaultDynamicSetResizeCutoff}
+	set := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if len(items) < set.resizeCutoff {
+	if len(items) < set.sizeThreshold {
 		set.array = ArraySet[T]{items: make([]T, 0, len(items))}
 
 		for _, item := range items {
@@ -60,15 +60,15 @@ func DynamicSetFromSlice[T comparable](items []T) DynamicSet[T] {
 	return set
 }
 
-func (set *DynamicSet[T]) SetResizeCutoff(resizeCutoff int) {
-	set.resizeCutoff = resizeCutoff
+func (set *DynamicSet[T]) SetSizeThreshold(sizeThreshold int) {
+	set.sizeThreshold = sizeThreshold
 }
 
 func (set *DynamicSet[T]) Add(item T) {
 	if set.isArraySet() {
 		set.array.Add(item)
 
-		if set.arraySetReachedCutoff() {
+		if set.arraySetReachedThreshold() {
 			set.transformToHashSet()
 		}
 	} else {
@@ -84,7 +84,7 @@ func (set *DynamicSet[T]) AddFromSlice(items []T) {
 	if set.isArraySet() {
 		set.array.AddFromSlice(items)
 
-		if set.arraySetReachedCutoff() {
+		if set.arraySetReachedThreshold() {
 			set.transformToHashSet()
 		}
 	} else {
@@ -96,7 +96,7 @@ func (set *DynamicSet[T]) MergeWith(otherSet ComparableSet[T]) {
 	if set.isArraySet() {
 		set.array.MergeWith(otherSet)
 
-		if set.arraySetReachedCutoff() {
+		if set.arraySetReachedThreshold() {
 			set.transformToHashSet()
 		}
 	} else {
@@ -110,7 +110,7 @@ func (set *DynamicSet[T]) Remove(item T) {
 	} else {
 		set.hash.Remove(item)
 
-		if set.hashSetReachedCutoff() {
+		if set.hashSetReachedThreshold() {
 			set.transformToArraySet()
 		}
 	}
@@ -174,12 +174,12 @@ func (set DynamicSet[T]) Union(otherSet ComparableSet[T]) Set[T] {
 }
 
 func (set DynamicSet[T]) UnionDynamicSet(otherSet ComparableSet[T]) DynamicSet[T] {
-	union := DynamicSet[T]{resizeCutoff: set.resizeCutoff}
+	union := DynamicSet[T]{sizeThreshold: set.sizeThreshold}
 
 	if set.isArraySet() {
 		union.array = set.array.UnionArraySet(otherSet)
 
-		if union.arraySetReachedCutoff() {
+		if union.arraySetReachedThreshold() {
 			union.transformToHashSet()
 		}
 	} else {
@@ -195,14 +195,14 @@ func (set DynamicSet[T]) Intersection(otherSet ComparableSet[T]) Set[T] {
 }
 
 func (set DynamicSet[T]) IntersectionDynamicSet(otherSet ComparableSet[T]) DynamicSet[T] {
-	intersection := DynamicSet[T]{resizeCutoff: set.resizeCutoff}
+	intersection := DynamicSet[T]{sizeThreshold: set.sizeThreshold}
 
 	if set.isArraySet() {
 		intersection.array = set.array.IntersectionArraySet(otherSet)
 	} else {
 		intersection.hash = set.hash.IntersectionHashSet(otherSet)
 
-		if intersection.hashSetReachedCutoff() {
+		if intersection.hashSetReachedThreshold() {
 			intersection.transformToArraySet()
 		}
 	}
@@ -252,7 +252,7 @@ func (set DynamicSet[T]) Copy() Set[T] {
 }
 
 func (set DynamicSet[T]) CopyDynamicSet() DynamicSet[T] {
-	newSet := DynamicSet[T]{resizeCutoff: set.resizeCutoff}
+	newSet := DynamicSet[T]{sizeThreshold: set.sizeThreshold}
 
 	if set.isArraySet() {
 		newSet.array = set.array.CopyArraySet()
@@ -304,12 +304,12 @@ func (set DynamicSet[T]) isArraySet() bool {
 	return set.hash.items == nil
 }
 
-func (set DynamicSet[T]) arraySetReachedCutoff() bool {
-	return len(set.array.items) >= set.resizeCutoff
+func (set DynamicSet[T]) arraySetReachedThreshold() bool {
+	return len(set.array.items) >= set.sizeThreshold
 }
 
-func (set DynamicSet[T]) hashSetReachedCutoff() bool {
-	return len(set.hash.items) <= set.resizeCutoff/2
+func (set DynamicSet[T]) hashSetReachedThreshold() bool {
+	return len(set.hash.items) <= set.sizeThreshold/2
 }
 
 func (set *DynamicSet[T]) transformToHashSet() {

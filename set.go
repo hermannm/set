@@ -1,5 +1,12 @@
 package set
 
+// A Set is an unordered collection of unique items of type T.
+//
+// Three types in this package implement Set:
+//   - [ArraySet] uses an array as its backing storage, and is optimized for small sets
+//   - [HashSet] uses a hashmap (with empty values) as its backing storage, optimized for large sets
+//   - [DynamicSet] starts out as an ArraySet, but transforms itself to a HashSet once it reaches a
+//     size threshold
 type Set[T comparable] interface {
 	ComparableSet[T]
 	Add(item T)
@@ -10,6 +17,7 @@ type Set[T comparable] interface {
 	Clear()
 }
 
+// A ComparableSet is the value type for a Set, with only the methods that will not mutate the set.
 type ComparableSet[T comparable] interface {
 	Contains(item T) bool
 	Size() int

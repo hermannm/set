@@ -196,9 +196,9 @@ func (set ArraySet[T]) ToHashSet() HashSet[T] {
 }
 
 func (set ArraySet[T]) ToDynamicSet() DynamicSet[T] {
-	dynamicSet := DynamicSet[T]{resizeCutoff: DefaultDynamicSetResizeCutoff}
+	dynamicSet := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if len(set.items) < dynamicSet.resizeCutoff {
+	if len(set.items) < dynamicSet.sizeThreshold {
 		dynamicSet.array = set.CopyArraySet()
 		return dynamicSet
 	} else {

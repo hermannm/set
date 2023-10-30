@@ -194,9 +194,9 @@ func (set HashSet[T]) ToHashSet() HashSet[T] {
 }
 
 func (set HashSet[T]) ToDynamicSet() DynamicSet[T] {
-	dynamicSet := DynamicSet[T]{resizeCutoff: DefaultDynamicSetResizeCutoff}
+	dynamicSet := DynamicSet[T]{sizeThreshold: DefaultDynamicSetSizeThreshold}
 
-	if len(set.items) >= dynamicSet.resizeCutoff {
+	if len(set.items) >= dynamicSet.sizeThreshold {
 		dynamicSet.hash = set.CopyHashSet()
 		return dynamicSet
 	} else {
