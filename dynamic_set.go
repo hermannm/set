@@ -133,19 +133,19 @@ func (set *DynamicSet[E]) AddFromSlice(elements []E) {
 	}
 }
 
-// MergeWith adds elements from the given other set to the set.
+// AddFromSet adds elements from the given other set to the set.
 //
 // If the DynamicSet is an ArraySet, it transforms to a HashSet if adding the elements brings it
 // above the set's size threshold.
-func (set *DynamicSet[E]) MergeWith(otherSet ComparableSet[E]) {
+func (set *DynamicSet[E]) AddFromSet(otherSet ComparableSet[E]) {
 	if set.IsArraySet() {
-		set.array.MergeWith(otherSet)
+		set.array.AddFromSet(otherSet)
 
 		if set.arraySetReachedThreshold() {
 			set.transformToHashSet()
 		}
 	} else {
-		set.hash.MergeWith(otherSet)
+		set.hash.AddFromSet(otherSet)
 	}
 }
 
@@ -398,11 +398,11 @@ func (set DynamicSet[E]) hashSetReachedThreshold() bool {
 }
 
 func (set *DynamicSet[E]) transformToHashSet() {
-	set.hash.MergeWith(set.array)
+	set.hash.AddFromSet(set.array)
 	set.array.elements = nil
 }
 
 func (set *DynamicSet[E]) transformToArraySet() {
-	set.array.MergeWith(set.hash)
+	set.array.AddFromSet(set.hash)
 	set.hash.elements = nil
 }

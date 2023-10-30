@@ -82,8 +82,8 @@ func (set *ArraySet[E]) AddFromSlice(elements []E) {
 	}
 }
 
-// MergeWith adds elements from the given other set to the set.
-func (set *ArraySet[E]) MergeWith(otherSet ComparableSet[E]) {
+// AddFromSet adds elements from the given other set to the set.
+func (set *ArraySet[E]) AddFromSet(otherSet ComparableSet[E]) {
 	if set.elements == nil {
 		set.elements = make([]E, 0, otherSet.Size())
 	}

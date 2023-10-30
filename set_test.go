@@ -101,13 +101,13 @@ func TestAddFromSlice(t *testing.T) {
 	})
 }
 
-func TestMergeWith(t *testing.T) {
+func TestAddFromSet(t *testing.T) {
 	otherSet := set.ArraySetOf(3, 4, 5)
 
 	testAllSetTypes(func(set set.Set[int], setName string) {
 		set.AddMultiple(1, 2, 3)
 
-		set.MergeWith(otherSet)
+		set.AddFromSet(otherSet)
 
 		assertSize(t, set, 5)
 		assertContains(t, set, 1, 2, 3, 4, 5)

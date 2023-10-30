@@ -22,8 +22,8 @@ type Set[E comparable] interface {
 	// only once, and elements already present in the set are not added.
 	AddFromSlice(elements []E)
 
-	// MergeWith adds elements from the given other set to the set.
-	MergeWith(otherSet ComparableSet[E])
+	// AddFromSet adds elements from the given other set to the set.
+	AddFromSet(otherSet ComparableSet[E])
 
 	// Remove removes the given element from the set.
 	// If the element is not present in the set, Remove is a no-op.

@@ -85,11 +85,11 @@ func (set *HashSet[E]) AddFromSlice(elements []E) {
 	}
 }
 
-// MergeWith adds elements from the given other set to the set.
+// AddFromSet adds elements from the given other set to the set.
 //
 // If the hash set was not previously initialized through one of the constructors in this package,
 // it will be initialized here.
-func (set *HashSet[E]) MergeWith(otherSet ComparableSet[E]) {
+func (set *HashSet[E]) AddFromSet(otherSet ComparableSet[E]) {
 	if set.elements == nil {
 		set.elements = make(map[E]struct{}, otherSet.Size())
 	}
