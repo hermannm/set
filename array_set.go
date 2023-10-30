@@ -226,36 +226,6 @@ func (set ArraySet[E]) ToMap() map[E]struct{} {
 	return m
 }
 
-// ToArraySet is equivalent to calling [ArraySet.CopyArraySet]. It is implemented to satisfy the
-// [Set] interface.
-func (set ArraySet[E]) ToArraySet() ArraySet[E] {
-	return set.CopyArraySet()
-}
-
-// ToHashSet creates a [HashSet] from the elements in the set.
-func (set ArraySet[E]) ToHashSet() HashSet[E] {
-	hashSet := HashSet[E]{elements: make(map[E]struct{}, len(set.elements))}
-
-	for _, element := range set.elements {
-		hashSet.elements[element] = struct{}{}
-	}
-
-	return hashSet
-}
-
-// ToDynamicSet creates a [DynamicSet] from the elements in the set.
-func (set ArraySet[E]) ToDynamicSet() DynamicSet[E] {
-	dynamicSet := DynamicSet[E]{sizeThreshold: DefaultDynamicSetSizeThreshold}
-
-	if len(set.elements) < dynamicSet.sizeThreshold {
-		dynamicSet.array = set.CopyArraySet()
-		return dynamicSet
-	} else {
-		dynamicSet.hash = set.ToHashSet()
-		return dynamicSet
-	}
-}
-
 // Copy creates a new set with all the same elements and capacity as the original set.
 // The underlying type of the returned set is an *ArraySet - to get a value type, use
 // [ArraySet.CopyArraySet] instead.

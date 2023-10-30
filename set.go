@@ -72,18 +72,6 @@ type ComparableSet[E comparable] interface {
 	// ToMap creates a map with all the set's elements as keys.
 	ToMap() map[E]struct{}
 
-	// ToArraySet creates an [ArraySet] from the elements in the set.
-	// If the set is already an ArraySet, this is equivalent to calling CopyArraySet on it.
-	ToArraySet() ArraySet[E]
-
-	// ToHashSet creates a [HashSet] from the elements in the set.
-	// If the set is already a HashSet, this is equivalent to calling CopyHashSet on it.
-	ToHashSet() HashSet[E]
-
-	// ToDynamicSet creates a [DynamicSet] from the elements in the set.
-	// If the set is already a DynamicSet, this is equivalent to calling CopyDynamicSet on it.
-	ToDynamicSet() DynamicSet[E]
-
 	// Copy creates a new set with all the same elements as the original set, and the same
 	// underlying type.
 	Copy() Set[E]

@@ -302,30 +302,6 @@ func (set DynamicSet[E]) ToMap() map[E]struct{} {
 	}
 }
 
-// ToArraySet creates an [ArraySet] from the elements in the set.
-func (set DynamicSet[E]) ToArraySet() ArraySet[E] {
-	if set.IsArraySet() {
-		return set.array.CopyArraySet()
-	} else {
-		return set.hash.ToArraySet()
-	}
-}
-
-// ToHashSet creates a [HashSet] from the elements in the set.
-func (set DynamicSet[E]) ToHashSet() HashSet[E] {
-	if set.IsArraySet() {
-		return set.array.ToHashSet()
-	} else {
-		return set.hash.CopyHashSet()
-	}
-}
-
-// ToHashSet is equivalent to calling [DynamicSet.CopyDynamicSet]. It is implemented to satisfy the
-// [Set] interface.
-func (set DynamicSet[E]) ToDynamicSet() DynamicSet[E] {
-	return set.CopyDynamicSet()
-}
-
 // Copy creates a new set with all the same elements and capacity as the original set.
 // The underlying type of the returned set is a *DynamicSet - to get a value type, use
 // [DynamicSet.CopyDynamicSet] instead.
@@ -422,11 +398,11 @@ func (set DynamicSet[E]) hashSetReachedThreshold() bool {
 }
 
 func (set *DynamicSet[E]) transformToHashSet() {
-	set.hash = set.array.ToHashSet()
+	set.hash.MergeWith(set.array)
 	set.array.elements = nil
 }
 
 func (set *DynamicSet[E]) transformToArraySet() {
-	set.array = set.hash.ToArraySet()
+	set.array.MergeWith(set.hash)
 	set.hash.elements = nil
 }
