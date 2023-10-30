@@ -16,9 +16,6 @@ type ArraySet[E comparable] struct {
 	elements []E
 }
 
-var _ Set[int] = (*ArraySet[int])(nil)
-var _ ComparableSet[int] = ArraySet[int]{}
-
 // NewArraySet creates a new [ArraySet] for elements of type E.
 // It must not be copied after first use.
 func NewArraySet[E comparable]() ArraySet[E] {

@@ -21,9 +21,6 @@ type DynamicSet[E comparable] struct {
 	hash          HashSet[E]
 }
 
-var _ Set[int] = (*DynamicSet[int])(nil)
-var _ ComparableSet[int] = DynamicSet[int]{}
-
 // DefaultDynamicSetSizeThreshold is the default size at which a DynamicSet will transform from an
 // ArraySet to a HashSet. From the benchmarks in benchmark_test.go, it appears that 20 elements is
 // around where HashSet.Contains performs better than ArraySet.Contains, though this varies by the

@@ -16,9 +16,6 @@ type HashSet[E comparable] struct {
 	elements map[E]struct{}
 }
 
-var _ Set[int] = (*HashSet[int])(nil)
-var _ ComparableSet[int] = HashSet[int]{}
-
 // NewHashSet creates a new [HashSet] for elements of type E.
 // It must not be copied after first use.
 func NewHashSet[E comparable]() HashSet[E] {
