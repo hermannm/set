@@ -410,6 +410,12 @@ func (set DynamicSet[E]) IsArraySet() bool {
 	return set.hash.elements == nil
 }
 
+// IsHashSet checks if the DynamicSet is a HashSet internally, i.e. that is has transformed after
+// reaching its size threshold.
+func (set DynamicSet[E]) IsHashSet() bool {
+	return set.hash.elements != nil
+}
+
 func (set DynamicSet[E]) arraySetReachedThreshold() bool {
 	return len(set.array.elements) >= set.sizeThreshold
 }
