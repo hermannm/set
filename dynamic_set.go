@@ -55,8 +55,18 @@ func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
 	return set
 }
 
-func (set *DynamicSet[E]) SetSizeEhreshold(sizeEhreshold int) {
-	set.sizeThreshold = sizeEhreshold
+func (set *DynamicSet[E]) SetSizeThreshold(sizeThreshold int) {
+	set.sizeThreshold = sizeThreshold
+
+	if set.isArraySet() {
+		if len(set.array.elements) >= sizeThreshold {
+			set.transformToHashSet()
+		}
+	} else {
+		if len(set.hash.elements) < sizeThreshold {
+			set.transformToArraySet()
+		}
+	}
 }
 
 func (set *DynamicSet[E]) Add(element E) {
