@@ -239,7 +239,7 @@ func TestToSlice(t *testing.T) {
 
 		assertSize(t, set, len(slice))
 
-		set.Iterate(func(setElement int) bool {
+		set.All()(func(setElement int) bool {
 			containedInSlice := false
 
 			for _, sliceElement := range slice {

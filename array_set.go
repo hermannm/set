@@ -88,7 +88,7 @@ func (set *ArraySet[E]) AddFromSet(otherSet ComparableSet[E]) {
 		set.elements = make([]E, 0, otherSet.Size())
 	}
 
-	otherSet.Iterate(func(element E) bool {
+	otherSet.All()(func(element E) bool {
 		set.Add(element)
 		return true
 	})
@@ -169,7 +169,7 @@ func (set ArraySet[E]) UnionArraySet(otherSet ComparableSet[E]) ArraySet[E] {
 		union.Add(element)
 	}
 
-	otherSet.Iterate(func(element E) bool {
+	otherSet.All()(func(element E) bool {
 		union.Add(element)
 		return true
 	})
@@ -260,19 +260,23 @@ func (set ArraySet[E]) String() string {
 	return stringBuilder.String()
 }
 
-// Iterate loops over every element in the set, and calls the given function on it.
-// It stops iteration if the function returns false.
+// All returns an iterator function, which when called will loop over the elements in the set and
+// call the given yield function on each element. If yield returns false, iteration stops.
 //
-// The boolean return from Iterate is there to satisfy the future interface for [range-over-func] in
-// Go, and is always false.
+// All aims to satisfy the planned signature for [range over func] in Go, allowing iteration over
+// sets like this in the future:
 //
-// [range-over-func]: https://github.com/golang/go/issues/61405
-func (set ArraySet[E]) Iterate(loopBody func(element E) bool) bool {
-	for _, element := range set.elements {
-		if !loopBody(element) {
-			return false
+//	for element := range mySet.All() {
+//		fmt.Println(element)
+//	}
+//
+// [range over func]: https://github.com/golang/go/issues/61405
+func (set ArraySet[E]) All() Iterator[E] {
+	return func(yield func(element E) bool) {
+		for _, element := range set.elements {
+			if !yield(element) {
+				break
+			}
 		}
 	}
-
-	return false
 }
