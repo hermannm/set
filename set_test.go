@@ -232,12 +232,44 @@ func TestIsSupersetOf(t *testing.T) {
 	})
 }
 
+func TestUnion(t *testing.T) {
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3)
+		set2 := set.ArraySetOf(3, 4, 5)
+
+		union := set1.Union(set2)
+
+		assertSize(t, union, 5)
+		assertContains(t, union, 1, 2, 3, 4, 5)
+	})
+}
+
+func TestIntersection(t *testing.T) {
+	testAllSetTypes(func(set1 set.Set[int], setName string) {
+		set1.AddMultiple(1, 2, 3, 4)
+		set2 := set.HashSetOf(2, 3, 4, 5)
+
+		intersection := set1.Intersection(set2)
+
+		assertSize(t, intersection, 3)
+		assertContains(t, intersection, 2, 3, 4)
+	})
+}
+
 func TestToSlice(t *testing.T) {
 	testAllSetTypes(func(set set.Set[int], setName string) {
 		set.AddMultiple(1, 2, 3)
 		slice := set.ToSlice()
 
-		assertSize(t, set, len(slice))
+		if len(slice) != set.Size() {
+			t.Errorf(
+				"expected len(%v) == %v.Size(), but got %d and %d",
+				slice,
+				set,
+				len(slice),
+				set.Size(),
+			)
+		}
 
 		set.All()(func(setElement int) bool {
 			containedInSlice := false
@@ -258,6 +290,35 @@ func TestToSlice(t *testing.T) {
 				)
 			}
 
+			return true
+		})
+	})
+}
+
+func TestToMap(t *testing.T) {
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+		m := set.ToMap()
+
+		if len(m) != set.Size() {
+			t.Errorf(
+				"expected len(%v) == %v.Size(), but got %d and %d",
+				m,
+				set,
+				len(m),
+				set.Size(),
+			)
+		}
+
+		set.All()(func(element int) bool {
+			if _, containedInMap := m[element]; !containedInMap {
+				t.Errorf(
+					"expected %v to contain all elements of %v, but did not contain %v",
+					m,
+					set,
+					element,
+				)
+			}
 			return true
 		})
 	})
@@ -315,30 +376,6 @@ func TestStringEmptySet(t *testing.T) {
 		if expected != actual {
 			t.Errorf("expected %v.String() == %s, got %s", set, expected, actual)
 		}
-	})
-}
-
-func TestUnion(t *testing.T) {
-	testAllSetTypes(func(set1 set.Set[int], setName string) {
-		set1.AddMultiple(1, 2, 3)
-		set2 := set.ArraySetOf(3, 4, 5)
-
-		union := set1.Union(set2)
-
-		assertSize(t, union, 5)
-		assertContains(t, union, 1, 2, 3, 4, 5)
-	})
-}
-
-func TestIntersection(t *testing.T) {
-	testAllSetTypes(func(set1 set.Set[int], setName string) {
-		set1.AddMultiple(1, 2, 3, 4)
-		set2 := set.HashSetOf(2, 3, 4, 5)
-
-		intersection := set1.Intersection(set2)
-
-		assertSize(t, intersection, 3)
-		assertContains(t, intersection, 2, 3, 4)
 	})
 }
 
