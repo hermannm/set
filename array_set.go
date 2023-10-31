@@ -260,17 +260,10 @@ func (set ArraySet[E]) String() string {
 	return stringBuilder.String()
 }
 
-// All returns an iterator function, which when called will loop over the elements in the set and
+// All returns an [Iterator] function, which when called will loop over the elements in the set and
 // call the given yield function on each element. If yield returns false, iteration stops.
 //
-// All aims to satisfy the planned signature for [range over func] in Go, allowing iteration over
-// sets like this in the future:
-//
-//	for element := range mySet.All() {
-//		fmt.Println(element)
-//	}
-//
-// [range over func]: https://github.com/golang/go/issues/61405
+// Since sets are unordered, iteration order is non-deterministic.
 func (set ArraySet[E]) All() Iterator[E] {
 	return func(yield func(element E) bool) {
 		for _, element := range set.elements {

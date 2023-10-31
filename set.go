@@ -84,20 +84,19 @@ type ComparableSet[E comparable] interface {
 	// called.
 	String() string
 
-	// All returns an iterator function, which when called will loop over the elements in the set
+	// All returns an [Iterator] function, which when called will loop over the elements in the set
 	// and call the given yield function on each element. If yield returns false, iteration stops.
 	//
 	// Since sets are unordered, iteration order is non-deterministic.
-	//
-	// All aims to satisfy the planned signature for [range over func] in Go, allowing iteration
-	// over sets like this in the future:
-	//
-	//   for element := range mySet.All() {
-	//   	fmt.Println(element)
-	//   }
-	//
-	// [range over func]: https://github.com/golang/go/issues/61405
 	All() Iterator[E]
 }
 
+// Iterator aims to satisfy the planned signature for [range over func] in Go, allowing iteration
+// over sets like this in the future:
+//
+//	for element := range mySet.All() {
+//		fmt.Println(element)
+//	}
+//
+// [range over func]: https://github.com/golang/go/issues/61405
 type Iterator[E comparable] func(yield func(element E) (continueIteration bool))
