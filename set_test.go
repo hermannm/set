@@ -379,6 +379,30 @@ func TestStringEmptySet(t *testing.T) {
 	})
 }
 
+func TestIterator(t *testing.T) {
+	testAllSetTypes(func(set set.Set[int], setName string) {
+		set.AddMultiple(1, 2, 3)
+		results := map[int]bool{}
+
+		set.All()(func(element int) bool {
+			results[element] = true
+			return true
+		})
+
+		if len(results) != 3 {
+			t.Errorf("expected iteration result map to have length 3, got %d", len(results))
+		}
+
+		if !results[1] || !results[2] || !results[3] {
+			t.Errorf(
+				"expected iteration result map to contain all elements of original set %v, but got %v",
+				set,
+				results,
+			)
+		}
+	})
+}
+
 type testSet struct {
 	set.ComparableSet[int]
 	name string
