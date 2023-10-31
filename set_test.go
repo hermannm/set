@@ -7,30 +7,30 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	for _, set := range []testSet{
-		{set.NewArraySet[int](), "ArraySet"},
-		{set.NewHashSet[int](), "HashSet"},
-		{set.NewDynamicSet[int](), "DynamicSet"},
+	for _, set := range []set.ComparableSet[int]{
+		set.NewArraySet[int](),
+		set.NewHashSet[int](),
+		set.NewDynamicSet[int](),
 	} {
 		assertSize(t, set, 0)
 	}
 }
 
 func TestWithCapacity(t *testing.T) {
-	for _, set := range []testSet{
-		{set.ArraySetWithCapacity[int](5), "ArraySet"},
-		{set.HashSetWithCapacity[int](5), "HashSet"},
-		{set.DynamicSetWithCapacity[int](5), "DynamicSet"},
+	for _, set := range []set.ComparableSet[int]{
+		set.ArraySetWithCapacity[int](5),
+		set.HashSetWithCapacity[int](5),
+		set.DynamicSetWithCapacity[int](5),
 	} {
 		assertSize(t, set, 0)
 	}
 }
 
 func TestOf(t *testing.T) {
-	for _, set := range []testSet{
-		{set.ArraySetOf(1, 2, 3), "ArraySet"},
-		{set.HashSetOf(1, 2, 3), "HashSet"},
-		{set.DynamicSetOf(1, 2, 3), "DynamicSet"},
+	for _, set := range []set.ComparableSet[int]{
+		set.ArraySetOf(1, 2, 3),
+		set.HashSetOf(1, 2, 3),
+		set.DynamicSetOf(1, 2, 3),
 	} {
 		assertSize(t, set, 3)
 		assertContains(t, set, 1, 2, 3)
@@ -40,10 +40,10 @@ func TestOf(t *testing.T) {
 func TestFromSlice(t *testing.T) {
 	slice := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-	for _, set := range []testSet{
-		{set.ArraySetFromSlice(slice), "ArraySet"},
-		{set.HashSetFromSlice(slice), "HashSet"},
-		{set.DynamicSetFromSlice(slice), "DynamicSet"},
+	for _, set := range []set.ComparableSet[int]{
+		set.ArraySetFromSlice(slice),
+		set.HashSetFromSlice(slice),
+		set.DynamicSetFromSlice(slice),
 	} {
 		assertSize(t, set, len(slice))
 		assertContains(t, set, slice...)
@@ -53,10 +53,10 @@ func TestFromSlice(t *testing.T) {
 func TestFromSliceWithDuplicates(t *testing.T) {
 	slice := []int{1, 1, 2, 2}
 
-	for _, set := range []testSet{
-		{set.ArraySetFromSlice(slice), "ArraySet"},
-		{set.HashSetFromSlice(slice), "HashSet"},
-		{set.DynamicSetFromSlice(slice), "DynamicSet"},
+	for _, set := range []set.ComparableSet[int]{
+		set.ArraySetFromSlice(slice),
+		set.HashSetFromSlice(slice),
+		set.DynamicSetFromSlice(slice),
 	} {
 		assertSize(t, set, 2)
 		assertContains(t, set, 1, 2)
@@ -463,11 +463,6 @@ func TestDynamicSetConstructors(t *testing.T) {
 			)
 		}
 	}
-}
-
-type testSet struct {
-	set.ComparableSet[int]
-	name string
 }
 
 func testAllSetTypes(testFunc func(set set.Set[int], setName string)) {
