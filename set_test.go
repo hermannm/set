@@ -403,6 +403,68 @@ func TestIterator(t *testing.T) {
 	})
 }
 
+func TestDynamicSetTransformation(t *testing.T) {
+	var set set.DynamicSet[int]
+	if !set.IsArraySet() {
+		t.Errorf("expected zero value of %v to start out as ArraySet", set)
+	}
+
+	ints := createRandomIntSlice(set.SizeThreshold())
+	for _, i := range ints {
+		set.Add(i)
+	}
+	if !set.IsHashSet() {
+		t.Errorf(
+			"expected %v to transform to HashSet after adding elements up to size threshold",
+			set,
+		)
+	}
+
+	for i := 0; i < set.SizeThreshold()/2; i++ {
+		set.Remove(ints[i])
+	}
+	if !set.IsArraySet() {
+		t.Errorf(
+			"expected %v to transform back to ArraySet after removing elements down to half of size threshold",
+			set,
+		)
+	}
+
+	set.SetSizeThreshold(set.Size() - 1)
+	if !set.IsHashSet() {
+		t.Errorf(
+			"expected %v to transform back to HashSet after setting size threshold to below current size",
+			set,
+		)
+	}
+}
+
+func TestDynamicSetConstructors(t *testing.T) {
+	for _, dynamicSet := range []struct {
+		set.DynamicSet[int]
+		name string
+	}{
+		{set.DynamicSet[int]{}, "zero value"},
+		{set.NewDynamicSet[int](), "NewDynamicSet"},
+		{set.DynamicSetWithCapacity[int](5), "DynamicSetWithCapacity"},
+		{set.DynamicSetOf(1, 2, 3), "DynamicSetOf"},
+		{set.DynamicSetFromSlice([]int{1, 2, 3}), "DynamicSetFromSlice"},
+	} {
+		if !dynamicSet.IsArraySet() {
+			t.Errorf("expected DynamicSet from %s to start out as ArraySet", dynamicSet.name)
+		}
+
+		if dynamicSet.SizeThreshold() != set.DefaultDynamicSetSizeThreshold {
+			t.Errorf(
+				"expected DynamicSet from %s to have size threshold %d, got %d",
+				dynamicSet.name,
+				set.DefaultDynamicSetSizeThreshold,
+				dynamicSet.SizeThreshold(),
+			)
+		}
+	}
+}
+
 type testSet struct {
 	set.ComparableSet[int]
 	name string
