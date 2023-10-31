@@ -1,3 +1,5 @@
+// Package set provides generic Set data structures (collections of unique elements). It implements
+// a [HashSet], an [ArraySet] and a [DynamicSet], with a common interface between them.
 package set
 
 // A Set is an unordered collection of unique elements of type E.

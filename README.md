@@ -1,7 +1,7 @@
 # set
 
-A small Go package that provides a generic Set data structure, an unordered collection of unique
-elements.
+A Go package that provides generic Set data structures (collections of unique elements). It
+implements a `HashSet`, an `ArraySet` and a `DynamicSet`, with a common interface between them.
 
 Run `go get hermannm.dev/set` to add it to your project!
 
