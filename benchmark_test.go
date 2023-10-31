@@ -108,7 +108,7 @@ func createRandomIntSlice(length int) []int {
 		ints[i], ints[j] = ints[j], ints[i]
 	}
 
-	return ints[:length+1]
+	return ints[:length]
 }
 
 func createRandomStringSlice(length int) []string {
