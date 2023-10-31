@@ -36,7 +36,9 @@ type Set[E comparable] interface {
 	Clear()
 }
 
-// A ComparableSet is the value type for a Set, with only the methods that will not mutate the set.
+// A ComparableSet is the value type for a Set, containing only non-mutating methods. This allows
+// passing an ArraySet, HashSet or DynamicSet by value, whereas the full [Set] interface is only
+// implemented when passing them by pointer.
 type ComparableSet[E comparable] interface {
 	// Contains checks if given element is present in the set.
 	Contains(element E) bool
