@@ -74,15 +74,23 @@ func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
 // SizeThreshold returns the size at which the DynamicSet will transform from an ArraySet to a
 // HashSet.
 func (set DynamicSet[E]) SizeThreshold() int {
-	return set.sizeThreshold
+	if set.sizeThreshold == 0 {
+		return DefaultDynamicSetSizeThreshold
+	} else {
+		return set.sizeThreshold
+	}
 }
 
 // SetSizeThreshold sets the size at which the DynamicSet will transform from an ArraySet to a
-// HashSet.
+// HashSet. A size threshold of 0 is ignored.
 //
 // If the set is an ArraySet above the given size threshold, it transforms to a HashSet immediately.
 // If the set is a HashSet below the given size threshold, it transforms to an ArraySet.
 func (set *DynamicSet[E]) SetSizeThreshold(sizeThreshold int) {
+	if sizeThreshold == 0 {
+		return
+	}
+
 	set.sizeThreshold = sizeThreshold
 
 	if set.IsArraySet() {
@@ -390,11 +398,19 @@ func (set DynamicSet[E]) IsHashSet() bool {
 	return set.hash.elements != nil
 }
 
-func (set DynamicSet[E]) arraySetReachedThreshold() bool {
+func (set *DynamicSet[E]) arraySetReachedThreshold() bool {
+	if set.sizeThreshold == 0 {
+		set.sizeThreshold = DefaultDynamicSetSizeThreshold
+	}
+
 	return len(set.array.elements) >= set.sizeThreshold
 }
 
-func (set DynamicSet[E]) hashSetReachedThreshold() bool {
+func (set *DynamicSet[E]) hashSetReachedThreshold() bool {
+	if set.sizeThreshold == 0 {
+		set.sizeThreshold = DefaultDynamicSetSizeThreshold
+	}
+
 	return len(set.hash.elements) <= set.sizeThreshold/2
 }
 
