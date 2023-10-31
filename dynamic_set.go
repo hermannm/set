@@ -71,6 +71,12 @@ func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
 	return set
 }
 
+// SizeThreshold returns the size at which the DynamicSet will transform from an ArraySet to a
+// HashSet.
+func (set DynamicSet[E]) SizeThreshold() int {
+	return set.sizeThreshold
+}
+
 // SetSizeThreshold sets the size at which the DynamicSet will transform from an ArraySet to a
 // HashSet.
 //
