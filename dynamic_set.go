@@ -295,10 +295,13 @@ func (set DynamicSet[E]) IntersectionDynamicSet(otherSet ComparableSet[E]) Dynam
 	return intersection
 }
 
-// ToSlice creates a slice with all the elements in the set.
+// ToSlice returns a slice with all the elements in the set.
 //
 // Since sets are unordered, the order of elements in the slice is non-deterministic, and may
 // vary even when called multiple times on the same set.
+//
+// If the underlying set type is an ArraySet, the returned slice uses the same backing storage,
+// so mutating it may invalidate the set. To avoid this, call CopyDynamicSet first.
 func (set DynamicSet[E]) ToSlice() []E {
 	if set.IsArraySet() {
 		return set.array.ToSlice()
@@ -307,7 +310,10 @@ func (set DynamicSet[E]) ToSlice() []E {
 	}
 }
 
-// ToMap creates a map with all the set's elements as keys.
+// ToMap returns a map with all the set's elements as keys.
+//
+// If the underlying set type is a HashSet, the returned map is the backing storage for the set,
+// so mutating it will also mutate the set. To avoid this, call CopyDynamicSet first.
 func (set DynamicSet[E]) ToMap() map[E]struct{} {
 	if set.IsArraySet() {
 		return set.array.ToMap()

@@ -205,14 +205,12 @@ func (set ArraySet[E]) IntersectionArraySet(otherSet ComparableSet[E]) ArraySet[
 	return intersection
 }
 
-// ToSlice creates a slice with all the elements in the set.
+// ToSlice returns a slice with all the elements in the set.
 //
-// The slice is a copy of the ArraySet's backing storage, so modifying the slice will not change the
-// set.
+// Mutating the slice may invalidate the set, since it uses the same backing storage. To avoid this,
+// call CopyArraySet first.
 func (set ArraySet[E]) ToSlice() []E {
-	slice := make([]E, len(set.elements))
-	copy(slice, set.elements)
-	return slice
+	return set.elements
 }
 
 // ToMap creates a map with all the set's elements as keys.

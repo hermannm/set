@@ -67,13 +67,19 @@ type ComparableSet[E comparable] interface {
 	// receiver.
 	Intersection(otherSet ComparableSet[E]) Set[E]
 
-	// ToSlice creates a slice with all the elements in the set.
+	// ToSlice returns a slice with all the elements in the set.
 	//
 	// Since sets are unordered, the order of elements in the slice is non-deterministic, and may
 	// vary even when called multiple times on the same set.
+	//
+	// If the underlying set type is an ArraySet, the returned slice uses the same backing storage,
+	// so mutating it may invalidate the set. To avoid this, call Copy first.
 	ToSlice() []E
 
-	// ToMap creates a map with all the set's elements as keys.
+	// ToMap returns a map with all the set's elements as keys.
+	//
+	// If the underlying set type is a HashSet, the returned map is the backing storage for the set,
+	// so mutating it will also mutate the set. To avoid this, call Copy first.
 	ToMap() map[E]struct{}
 
 	// Copy creates a new set with all the same elements as the original set, and the same

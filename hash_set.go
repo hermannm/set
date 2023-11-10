@@ -223,17 +223,12 @@ func (set HashSet[E]) ToSlice() []E {
 	return slice
 }
 
-// ToMap creates a map with all the set's elements as keys.
+// ToMap returns a map with all the set's elements as keys.
 //
-// The map is a copy of the HashSet's backing storage, so modifying the map will not change the set.
+// Mutating the map will also mutate the set, since it uses the same backing storage. To avoid this,
+// call CopyHashSet first.
 func (set HashSet[E]) ToMap() map[E]struct{} {
-	m := make(map[E]struct{}, len(set.elements))
-
-	for element := range set.elements {
-		m[element] = struct{}{}
-	}
-
-	return m
+	return set.elements
 }
 
 // Copy creates a new set with all the same elements and capacity as the original set.
