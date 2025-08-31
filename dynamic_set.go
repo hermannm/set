@@ -40,10 +40,19 @@ func NewDynamicSet[E comparable]() DynamicSet[E] {
 // DynamicSetWithCapacity creates a new [DynamicSet], with at least the given initial capacity.
 // It must not be copied after first use.
 func DynamicSetWithCapacity[E comparable](capacity int) DynamicSet[E] {
-	return DynamicSet[E]{
+	set := DynamicSet[E]{
 		sizeThreshold: DefaultDynamicSetSizeThreshold,
-		array:         ArraySetWithCapacity[E](capacity),
+		array:         ArraySet[E]{elements: nil},
+		hash:          HashSet[E]{elements: nil},
 	}
+
+	if capacity < set.sizeThreshold {
+		set.array = ArraySetWithCapacity[E](capacity)
+	} else {
+		set.hash = HashSetWithCapacity[E](capacity)
+	}
+
+	return set
 }
 
 // DynamicSetOf creates a new [DynamicSet] from the given elements.
@@ -60,6 +69,7 @@ func DynamicSetFromSlice[E comparable](elements []E) DynamicSet[E] {
 	set := DynamicSet[E]{
 		sizeThreshold: DefaultDynamicSetSizeThreshold,
 		array:         ArraySet[E]{elements: make([]E, 0, len(elements))},
+		hash:          HashSet[E]{elements: nil},
 	}
 
 	set.array.AddFromSlice(elements)
@@ -254,7 +264,11 @@ func (set DynamicSet[E]) Union(otherSet ComparableSet[E]) Set[E] {
 // UnionDynamicSet creates a new DynamicSet that contains all the elements of the receiver set and
 // the other given set.
 func (set DynamicSet[E]) UnionDynamicSet(otherSet ComparableSet[E]) DynamicSet[E] {
-	union := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
+	union := DynamicSet[E]{
+		sizeThreshold: set.sizeThreshold,
+		array:         ArraySet[E]{elements: nil},
+		hash:          HashSet[E]{elements: nil},
+	}
 
 	if set.IsArraySet() {
 		union.array = set.array.UnionArraySet(otherSet)
@@ -280,7 +294,11 @@ func (set DynamicSet[E]) Intersection(otherSet ComparableSet[E]) Set[E] {
 // IntersectionDynamicSet creates a new DynamicSet with only the elements that exist in both the
 // receiver set and the other given set.
 func (set DynamicSet[E]) IntersectionDynamicSet(otherSet ComparableSet[E]) DynamicSet[E] {
-	intersection := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
+	intersection := DynamicSet[E]{
+		sizeThreshold: set.sizeThreshold,
+		array:         ArraySet[E]{elements: nil},
+		hash:          HashSet[E]{elements: nil},
+	}
 
 	if set.IsArraySet() {
 		intersection.array = set.array.IntersectionArraySet(otherSet)
@@ -333,7 +351,11 @@ func (set DynamicSet[E]) Copy() Set[E] {
 // CopyDynamicSet creates a new DynamicSet with all the same elements and capacity as the original
 // set.
 func (set DynamicSet[E]) CopyDynamicSet() DynamicSet[E] {
-	newSet := DynamicSet[E]{sizeThreshold: set.sizeThreshold}
+	newSet := DynamicSet[E]{
+		sizeThreshold: set.sizeThreshold,
+		array:         ArraySet[E]{elements: nil},
+		hash:          HashSet[E]{elements: nil},
+	}
 
 	if set.IsArraySet() {
 		newSet.array = set.array.CopyArraySet()
@@ -357,7 +379,7 @@ func (set DynamicSet[E]) String() string {
 
 	if set.IsArraySet() {
 		for i, element := range set.array.elements {
-			fmt.Fprint(&stringBuilder, element)
+			_, _ = fmt.Fprint(&stringBuilder, element)
 
 			if i < len(set.array.elements)-1 {
 				stringBuilder.WriteString(", ")
@@ -366,7 +388,7 @@ func (set DynamicSet[E]) String() string {
 	} else {
 		i := 0
 		for element := range set.hash.elements {
-			fmt.Fprint(&stringBuilder, element)
+			_, _ = fmt.Fprint(&stringBuilder, element)
 
 			if i < len(set.hash.elements)-1 {
 				stringBuilder.WriteString(", ")

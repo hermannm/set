@@ -30,15 +30,17 @@ var (
 	structArraySet = set.ArraySetFromSlice(setStructs)
 	structHashSet  = set.HashSetFromSlice(setStructs)
 	inputStructs   = createRandomStructSlice(inputSize)
-
-	// Global variables to avoid the compiler optimizing away our benchmarked function calls
-	// (see https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)
-	globalContains = false
 )
+
+// Global variables to avoid the compiler optimizing away our benchmarked function calls (see
+// https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)
+//
+//goland:noinspection GoUnusedGlobalVariable
+var globalContains = false
 
 func BenchmarkIntArraySet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, i := range inputInts {
 			contains = intArraySet.Contains(i)
 		}
@@ -48,7 +50,7 @@ func BenchmarkIntArraySet(b *testing.B) {
 
 func BenchmarkIntHashSet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, i := range inputInts {
 			contains = intHashSet.Contains(i)
 		}
@@ -58,7 +60,7 @@ func BenchmarkIntHashSet(b *testing.B) {
 
 func BenchmarkStringArraySet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, s := range inputStrings {
 			contains = stringArraySet.Contains(s)
 		}
@@ -68,7 +70,7 @@ func BenchmarkStringArraySet(b *testing.B) {
 
 func BenchmarkStringHashSet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, s := range inputStrings {
 			contains = stringHashSet.Contains(s)
 		}
@@ -78,7 +80,7 @@ func BenchmarkStringHashSet(b *testing.B) {
 
 func BenchmarkStructArraySet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, s := range inputStructs {
 			contains = structArraySet.Contains(s)
 		}
@@ -88,7 +90,7 @@ func BenchmarkStructArraySet(b *testing.B) {
 
 func BenchmarkStructHashSet(b *testing.B) {
 	var contains bool
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for _, s := range inputStructs {
 			contains = structHashSet.Contains(s)
 		}

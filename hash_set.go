@@ -94,10 +94,12 @@ func (set *HashSet[E]) AddFromSet(otherSet ComparableSet[E]) {
 		set.elements = make(map[E]struct{}, otherSet.Size())
 	}
 
-	otherSet.All()(func(element E) bool {
-		set.Add(element)
-		return true
-	})
+	otherSet.All()(
+		func(element E) bool {
+			set.Add(element)
+			return true
+		},
+	)
 }
 
 // Remove removes the given element from the set.
@@ -171,10 +173,12 @@ func (set HashSet[E]) UnionHashSet(otherSet ComparableSet[E]) HashSet[E] {
 		union.Add(element)
 	}
 
-	otherSet.All()(func(element E) bool {
-		union.Add(element)
-		return true
-	})
+	otherSet.All()(
+		func(element E) bool {
+			union.Add(element)
+			return true
+		},
+	)
 
 	return union
 }
@@ -262,7 +266,7 @@ func (set HashSet[E]) String() string {
 
 	i := 0
 	for element := range set.elements {
-		fmt.Fprint(&stringBuilder, element)
+		_, _ = fmt.Fprint(&stringBuilder, element)
 
 		if i < len(set.elements)-1 {
 			stringBuilder.WriteString(", ")

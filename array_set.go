@@ -88,10 +88,12 @@ func (set *ArraySet[E]) AddFromSet(otherSet ComparableSet[E]) {
 		set.elements = make([]E, 0, otherSet.Size())
 	}
 
-	otherSet.All()(func(element E) bool {
-		set.Add(element)
-		return true
-	})
+	otherSet.All()(
+		func(element E) bool {
+			set.Add(element)
+			return true
+		},
+	)
 }
 
 // Remove removes the given element from the set.
@@ -169,10 +171,12 @@ func (set ArraySet[E]) UnionArraySet(otherSet ComparableSet[E]) ArraySet[E] {
 		union.Add(element)
 	}
 
-	otherSet.All()(func(element E) bool {
-		union.Add(element)
-		return true
-	})
+	otherSet.All()(
+		func(element E) bool {
+			union.Add(element)
+			return true
+		},
+	)
 
 	return union
 }
@@ -241,13 +245,13 @@ func (set ArraySet[E]) CopyArraySet() ArraySet[E] {
 
 // String returns a string representation of the set, implementing [fmt.Stringer].
 //
-// An ArraySet of elements 1, 2 and 3 will be printed as: ArraySet{1, 2, 3}
+// An ArraySet of elements 1, 2 and 3 will be printed as: ArraySet{1, 2, 3}.
 func (set ArraySet[E]) String() string {
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("ArraySet{")
 
 	for i, element := range set.elements {
-		fmt.Fprint(&stringBuilder, element)
+		_, _ = fmt.Fprint(&stringBuilder, element)
 
 		if i < len(set.elements)-1 {
 			stringBuilder.WriteString(", ")
