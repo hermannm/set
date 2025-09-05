@@ -13,7 +13,7 @@ Run `go get hermannm.dev/set` to add it to your project!
 **Contents:**
 
 - [Usage](#usage)
-- [Developer's guide](#developers-guide)
+- [Maintainer's guide](#maintainers-guide)
 
 ## Usage
 
@@ -54,9 +54,9 @@ func main() {
 
 See the [docs](https://pkg.go.dev/hermannm.dev/set) for more details.
 
-## Developer's guide
+## Maintainer's guide
 
-When publishing a new release:
+### Publishing a new release
 
 - Run tests and linter ([`golangci-lint`](https://golangci-lint.run/)):
   ```
